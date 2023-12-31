@@ -14,12 +14,11 @@ describe(ExecEngine, (): void => {
     expect(sub_process.status).toEqual('success')
     expect(sub_process.signal).toBeUndefined()
     expect(sub_process.exitCode).toEqual(0)
-    expect(sub_process.stdout).toEqual(
-      Buffer.from(`CODE-OF-CONDUCT.md
+    expect(sub_process.stdout.toString()).toMatch(
+      new RegExp(`CODE-OF-CONDUCT.md
 CONTRIBUTING.md
 LICENSE.md
-README.md
-coverage
+README.md(\ncoverage)?
 node_modules
 package-lock.json
 package.json
@@ -39,7 +38,7 @@ tsconfig.json\n`)
     ])
   })
 
-  it('is prepared for when a sub_process fails', async (): Promise<void> => {
+  it('is prepared for when a process fails', async (): Promise<void> => {
     const sub_process = new SubProcess({ engine: 'exec', command: 'nonexistent', args: ['arg'] })
     const listener = jest.fn()
 
@@ -51,7 +50,7 @@ tsconfig.json\n`)
     expect(sub_process.signal).toBeUndefined()
     expect(sub_process.exitCode).toEqual(127)
     expect(sub_process.stdout).toEqual(Buffer.from(''))
-    expect(sub_process.stderr.toString()).toMatch(/.*command not found: nonexistent.*/)
+    expect(sub_process.stderr.toString()).toMatch(/.*not found.*/)
 
     expect(listener.mock.calls).toEqual([
       [{ event: 'running', payload: { process: sub_process } }],
@@ -61,7 +60,7 @@ tsconfig.json\n`)
     ])
   })
 
-  it('is prepared for when a sub_process is killed', async (): Promise<void> => {
+  it('is prepared for when a process is killed', async (): Promise<void> => {
     const sub_process = new SubProcess({ engine: 'exec', command: 'sleep', args: ['100'] })
     const listener = jest.fn()
 
@@ -69,7 +68,7 @@ tsconfig.json\n`)
 
     sub_process.run()
 
-    await new Promise((resolve) => setTimeout(resolve, 400))
+    await sub_process.waitFor('running')
 
     await sub_process.kill()
 

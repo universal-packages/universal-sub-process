@@ -25,7 +25,7 @@ describe(ForkEngine, (): void => {
     ])
   })
 
-  it('is prepared for when a sub_process fails', async (): Promise<void> => {
+  it('is prepared for when a process fails', async (): Promise<void> => {
     const sub_process = new SubProcess({ engine: 'fork', command: './tests/__fixtures__/failure.js', args: ['arg'] })
     const listener = jest.fn()
 
@@ -46,7 +46,7 @@ describe(ForkEngine, (): void => {
     ])
   })
 
-  it('is prepared for when a sub_process is killed', async (): Promise<void> => {
+  it('is prepared for when a process is killed', async (): Promise<void> => {
     const sub_process = new SubProcess({ engine: 'fork', command: './tests/__fixtures__/kill-me', args: ['100'] })
     const listener = jest.fn()
 
@@ -54,7 +54,7 @@ describe(ForkEngine, (): void => {
 
     sub_process.run()
 
-    await new Promise((resolve) => setTimeout(resolve, 400))
+    await sub_process.waitFor('running')
 
     await sub_process.kill()
 
