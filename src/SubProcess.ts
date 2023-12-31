@@ -85,6 +85,10 @@ export default class Process extends EventEmitter {
     }
 
     return new Promise(async (resolve) => {
+      const measurer = startMeasurement()
+
+      this.processStatus = ProcessStatus.RUNNING
+
       try {
         const finalWorkingDirectory = this.options.workingDirectory ? checkDirectory(this.options.workingDirectory) : undefined
 
@@ -103,10 +107,6 @@ export default class Process extends EventEmitter {
           this.kill()
         }, this.options.timeout)
       }
-
-      const measurer = startMeasurement()
-
-      this.processStatus = ProcessStatus.RUNNING
 
       this.emit('running', { payload: { process: this } })
 
