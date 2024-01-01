@@ -13,6 +13,12 @@ export default class BaseChildProcessEngine implements EngineInterface {
 
     childProcess.stdout?.on('data', (data) => childProcessEngineProcess.emit('stdout', data))
     childProcess.stderr?.on('data', (data) => childProcessEngineProcess.emit('stderr', data))
+    childProcess.on('error', (error) => {
+      this.error = error
+
+      childProcessEngineProcess.emit('stderr', Buffer.from(error.message))
+      childProcessEngineProcess.emit('failure', error['errno'] || error['code'] || 1)
+    })
     childProcess.on('close', (code, signal) => {
       if (code === 0) {
         childProcessEngineProcess.emit('success')
