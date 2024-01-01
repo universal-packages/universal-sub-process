@@ -221,7 +221,7 @@ export default class Process extends EventEmitter {
     if (typeof this.options.engine === 'string') {
       const AdapterModule = resolveAdapter<EngineInterfaceClass>({
         name: this.options.engine,
-        domain: 'process',
+        domain: 'sub-process',
         type: 'engine',
         internal: { exec: ExecEngine, fork: ForkEngine, spawn: SpawnEngine, test: TestEngine }
       })
