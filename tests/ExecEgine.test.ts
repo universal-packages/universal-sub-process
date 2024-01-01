@@ -39,7 +39,7 @@ tsconfig.json\n`)
   })
 
   it('is prepared for when a process fails', async (): Promise<void> => {
-    const sub_process = new SubProcess({ engine: 'exec', command: 'nonexistent', args: ['arg'] })
+    const sub_process = new SubProcess({ engine: 'exec', command: 'git', args: ['clone', 'nonexistent'] })
     const listener = jest.fn()
 
     sub_process.on('*', listener)
@@ -48,9 +48,9 @@ tsconfig.json\n`)
 
     expect(sub_process.status).toEqual('failure')
     expect(sub_process.signal).toBeUndefined()
-    expect(sub_process.exitCode).toEqual(127)
+    expect(sub_process.exitCode).toEqual(128)
     expect(sub_process.stdout).toEqual(Buffer.from(''))
-    expect(sub_process.stderr.toString()).toMatch(/.*not found.*/)
+    expect(sub_process.stderr.toString()).toMatch("fatal: repository 'nonexistent' does not exist\n")
 
     expect(listener.mock.calls).toEqual([
       [{ event: 'running', payload: { process: sub_process } }],
