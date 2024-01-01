@@ -87,7 +87,7 @@ tsconfig.json\n`)
   })
 
   it('is receives the input correctly', async (): Promise<void> => {
-    const sub_process = new SubProcess({ engine: 'spawn', engineOptions: { shell: true }, command: 'read variable && echo $variable', input: 'value' })
+    const sub_process = new SubProcess({ engine: 'spawn', command: 'read variable && echo $variable', input: 'value' })
     const listener = jest.fn()
 
     sub_process.on('*', listener)

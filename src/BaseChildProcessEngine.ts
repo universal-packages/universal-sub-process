@@ -51,6 +51,6 @@ export default class BaseChildProcessEngine implements EngineInterface {
   }
 
   protected getShellName(): string {
-    return process.env.SHELL?.split('/').pop()!
+    return process.env.SHELL?.split('/').pop() || 'bash'
   }
 }
