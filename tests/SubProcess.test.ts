@@ -4,7 +4,7 @@ import { Readable } from 'stream'
 import { ExecEngine, SubProcess, TestEngine } from '../src'
 
 beforeEach((): void => {
-  TestEngine.commandHistory.length = 0
+  TestEngine.reset()
 })
 
 describe(SubProcess, (): void => {
@@ -93,20 +93,27 @@ describe(SubProcess, (): void => {
   })
 
   it('is prepared for when a an error occurs', async (): Promise<void> => {
-    const sub_process = new SubProcess({ command: 'error', args: ['any'] })
+    const sub_process = new SubProcess({ command: 'error', args: ['any'], throwIfNotSuccessful: true })
     const listener = jest.fn()
+    let error: Error
 
     sub_process.on('*', listener)
 
     TestEngine.mockProcessEvents([{ type: 'error', error: new Error('Command error') }])
 
-    await sub_process.run()
+    try {
+      await sub_process.run()
+    } catch (err) {
+      error = err
+    }
 
     expect(sub_process.status).toEqual('error')
     expect(sub_process.signal).toBeUndefined()
     expect(sub_process.exitCode).toBeUndefined()
     expect(sub_process.stdout).toEqual(Buffer.from(''))
     expect(sub_process.stderr).toEqual(Buffer.from(''))
+
+    expect(error).toEqual(new Error('Command error'))
 
     expect(listener.mock.calls).toEqual([[{ event: 'error', error: new Error('Command error'), payload: { process: sub_process } }]])
 
@@ -209,8 +216,9 @@ describe(SubProcess, (): void => {
   })
 
   it('timeouts a process', async (): Promise<void> => {
-    const sub_process = new SubProcess({ command: 'sleep', args: ['any'], timeout: 2 })
+    const sub_process = new SubProcess({ command: 'sleep', args: ['any'], timeout: 2, throwIfNotSuccessful: true })
     const listener = jest.fn()
+    let error: Error
 
     sub_process.on('*', listener)
 
@@ -219,13 +227,19 @@ describe(SubProcess, (): void => {
       { type: 'stdout', data: 'Command stdout' }
     ])
 
-    await sub_process.run()
+    try {
+      await sub_process.run()
+    } catch (err) {
+      error = err
+    }
 
     expect(sub_process.status).toEqual('killed')
     expect(sub_process.signal).toEqual('SIGTERM')
     expect(sub_process.exitCode).toBeUndefined()
     expect(sub_process.stdout).toEqual(Buffer.from('Command stdout'))
     expect(sub_process.stderr).toEqual(Buffer.from(''))
+
+    expect(error).toEqual(new Error('Process was killed with signal SIGTERM'))
 
     expect(listener.mock.calls).toEqual([
       [{ event: 'running', payload: { process: sub_process } }],

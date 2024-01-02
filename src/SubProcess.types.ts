@@ -18,6 +18,7 @@ export interface SubProcessOptions {
   engineOptions?: Record<string, any>
   env?: Record<string, string>
   input?: string | Buffer | string[] | Buffer[] | Readable
+  throwIfNotSuccessful?: boolean
   timeout?: number
   workingDirectory?: string
 }

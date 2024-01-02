@@ -56,7 +56,7 @@ export default class Process extends EventEmitter {
 
   constructor(options: SubProcessOptions) {
     super()
-    this.options = { engine: process.env.NODE_ENV === 'test' ? 'test' : 'spawn', ...options }
+    this.options = { engine: process.env.NODE_ENV === 'test' ? 'test' : 'spawn', throwIfNotSuccessful: false, ...options }
     this.command = this.extractCommand(options.command)
     this.args = this.extractArgs(options.command, options.args)
     this.env = options.env || {}
@@ -84,7 +84,7 @@ export default class Process extends EventEmitter {
         return
     }
 
-    return new Promise(async (resolve) => {
+    return new Promise(async (resolve, reject) => {
       const measurer = startMeasurement()
 
       this.processStatus = ProcessStatus.RUNNING
@@ -97,7 +97,7 @@ export default class Process extends EventEmitter {
         this.processStatus = ProcessStatus.ERROR
 
         this.emit('error', { error, payload: { process: this } })
-        resolve()
+        this.options.throwIfNotSuccessful ? reject(error) : resolve()
         return
       }
 
@@ -145,7 +145,7 @@ export default class Process extends EventEmitter {
 
         this.emit('failure', { measurement, payload: { process: this } })
         this.emit('end', { measurement, payload: { process: this } })
-        resolve()
+        this.options.throwIfNotSuccessful ? reject(new Error(`Process exited with code ${exitCode}\n\n${this.stderr.toString()}`)) : resolve()
       })
 
       this.engineProcess.on('killed', (signal) => {
@@ -158,7 +158,7 @@ export default class Process extends EventEmitter {
 
         this.emit('killed', { measurement, payload: { process: this } })
         this.emit('end', { measurement, payload: { process: this } })
-        resolve()
+        this.options.throwIfNotSuccessful ? reject(new Error(`Process was killed with signal ${signal}`)) : resolve()
       })
     })
   }
