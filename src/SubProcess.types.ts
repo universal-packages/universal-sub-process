@@ -2,15 +2,6 @@ import { Readable } from 'stream'
 
 import EngineProcess from './EngineProcess'
 
-export enum ProcessStatus {
-  IDLE = 'idle',
-  RUNNING = 'running',
-  SUCCESS = 'success',
-  ERROR = 'error',
-  FAILURE = 'failure',
-  KILLED = 'killed'
-}
-
 export interface SubProcessOptions {
   args?: string[]
   command: string
@@ -18,7 +9,6 @@ export interface SubProcessOptions {
   engineOptions?: Record<string, any>
   env?: Record<string, string>
   input?: string | Buffer | string[] | Buffer[] | Readable
-  throwIfNotSuccessful?: boolean
   timeout?: number
   workingDirectory?: string
 }

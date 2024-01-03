@@ -33,6 +33,9 @@ export default class BaseChildProcessEngine implements EngineInterface {
       }
     })
 
+    // Ignore stdin errors they occur when the process is killed
+    childProcess.stdin?.on('error', () => {})
+
     if (childProcess.stdin) input.pipe(childProcess.stdin)
 
     return childProcessEngineProcess

@@ -2,6 +2,7 @@ import { Measurement } from '@universal-packages/time-measurer'
 import { Readable } from 'stream'
 
 import { ExecEngine, SubProcess, TestEngine } from '../src'
+import { Status } from '../src/BaseRunner.types'
 
 beforeEach((): void => {
   TestEngine.reset()
@@ -9,31 +10,34 @@ beforeEach((): void => {
 
 describe(SubProcess, (): void => {
   it('runs a given command', async (): Promise<void> => {
-    const sub_process = new SubProcess({ command: 'echo', args: ['hello'] })
+    const subProcess = new SubProcess({ command: 'echo', args: ['hello'] })
     const listener = jest.fn()
 
-    sub_process.on('*', listener)
+    subProcess.on('*', listener)
 
     TestEngine.mockProcessEvents([
       { type: 'stdout', data: 'Command stdout' },
       { type: 'stdout', data: 'Command stdout' }
     ])
 
-    await sub_process.run()
+    await subProcess.run()
 
-    expect(sub_process.status).toEqual('success')
-    expect(sub_process.signal).toBeUndefined()
-    expect(sub_process.exitCode).toEqual(0)
-    expect(sub_process.stdout).toEqual(Buffer.from('Command stdoutCommand stdout'))
-    expect(sub_process.stderr).toEqual(Buffer.from(''))
-    expect(sub_process.processId).toBeGreaterThan(0)
+    expect(subProcess.status).toEqual(Status.SUCCESS)
+    expect(subProcess.signal).toBeUndefined()
+    expect(subProcess.exitCode).toEqual(0)
+    expect(subProcess.stdout).toEqual(Buffer.from('Command stdoutCommand stdout'))
+    expect(subProcess.stderr).toEqual(Buffer.from(''))
+    expect(subProcess.processId).toBeGreaterThan(0)
+    expect(subProcess.measurement).toBeInstanceOf(Measurement)
+    expect(subProcess.startedAt).toBeInstanceOf(Date)
+    expect(subProcess.endedAt).toBeInstanceOf(Date)
 
     expect(listener.mock.calls).toEqual([
-      [{ event: 'running', payload: { process: sub_process } }],
-      [{ event: 'stdout', payload: { data: Buffer.from('Command stdout'), process: sub_process } }],
-      [{ event: 'stdout', payload: { data: Buffer.from('Command stdout'), process: sub_process } }],
-      [{ event: 'success', measurement: expect.any(Measurement), payload: { process: sub_process } }],
-      [{ event: 'end', measurement: expect.any(Measurement), payload: { process: sub_process } }]
+      [{ event: 'running', payload: { startedAt: expect.any(Date) } }],
+      [{ event: 'stdout', payload: { data: Buffer.from('Command stdout') } }],
+      [{ event: 'stdout', payload: { data: Buffer.from('Command stdout') } }],
+      [{ event: 'success', measurement: expect.any(Measurement) }],
+      [{ event: 'end', measurement: expect.any(Measurement), payload: { endedAt: expect.any(Date) } }]
     ])
 
     expect(TestEngine.commandHistory).toEqual([
@@ -52,29 +56,29 @@ describe(SubProcess, (): void => {
   })
 
   it('is prepared for when a process fails', async (): Promise<void> => {
-    const sub_process = new SubProcess({ command: 'failure', args: ['any'] })
+    const subProcess = new SubProcess({ command: 'failure', args: ['any'] })
     const listener = jest.fn()
 
-    sub_process.on('*', listener)
+    subProcess.on('*', listener)
 
     TestEngine.mockProcessEvents([
       { type: 'stderr', data: 'Command failure' },
       { type: 'exit', code: 1 }
     ])
 
-    await sub_process.run()
+    await subProcess.run()
 
-    expect(sub_process.status).toEqual('failure')
-    expect(sub_process.signal).toBeUndefined()
-    expect(sub_process.exitCode).toEqual(1)
-    expect(sub_process.stdout).toEqual(Buffer.from(''))
-    expect(sub_process.stderr).toEqual(Buffer.from('Command failure'))
+    expect(subProcess.status).toEqual(Status.FAILURE)
+    expect(subProcess.signal).toBeUndefined()
+    expect(subProcess.exitCode).toEqual(1)
+    expect(subProcess.stdout).toEqual(Buffer.from(''))
+    expect(subProcess.stderr).toEqual(Buffer.from('Command failure'))
 
     expect(listener.mock.calls).toEqual([
-      [{ event: 'running', payload: { process: sub_process } }],
-      [{ event: 'stderr', payload: { data: Buffer.from('Command failure'), process: sub_process } }],
-      [{ event: 'failure', measurement: expect.any(Measurement), payload: { process: sub_process } }],
-      [{ event: 'end', measurement: expect.any(Measurement), payload: { process: sub_process } }]
+      [{ event: 'running', payload: { startedAt: expect.any(Date) } }],
+      [{ event: 'stderr', payload: { data: Buffer.from('Command failure') } }],
+      [{ event: 'failure', measurement: expect.any(Measurement) }],
+      [{ event: 'end', measurement: expect.any(Measurement), payload: { endedAt: expect.any(Date) } }]
     ])
 
     expect(TestEngine.commandHistory).toEqual([
@@ -93,29 +97,24 @@ describe(SubProcess, (): void => {
   })
 
   it('is prepared for when a an error occurs', async (): Promise<void> => {
-    const sub_process = new SubProcess({ command: 'error', args: ['any'], throwIfNotSuccessful: true })
-    const listener = jest.fn()
+    const subProcess = new SubProcess({ command: 'error', args: ['any'] })
     let error: Error
-
-    sub_process.on('*', listener)
 
     TestEngine.mockProcessEvents([{ type: 'error', error: new Error('Command error') }])
 
     try {
-      await sub_process.run()
+      await subProcess.run()
     } catch (err) {
       error = err
     }
 
-    expect(sub_process.status).toEqual('error')
-    expect(sub_process.signal).toBeUndefined()
-    expect(sub_process.exitCode).toBeUndefined()
-    expect(sub_process.stdout).toEqual(Buffer.from(''))
-    expect(sub_process.stderr).toEqual(Buffer.from(''))
+    expect(subProcess.status).toEqual(Status.ERROR)
+    expect(subProcess.signal).toBeUndefined()
+    expect(subProcess.exitCode).toBeUndefined()
+    expect(subProcess.stdout).toEqual(Buffer.from(''))
+    expect(subProcess.stderr).toEqual(Buffer.from(''))
 
     expect(error).toEqual(new Error('Command error'))
-
-    expect(listener.mock.calls).toEqual([[{ event: 'error', error: new Error('Command error'), payload: { process: sub_process } }]])
 
     expect(TestEngine.commandHistory).toEqual([
       {
@@ -130,34 +129,34 @@ describe(SubProcess, (): void => {
   })
 
   it('is prepared for when a process is killed', async (): Promise<void> => {
-    const sub_process = new SubProcess({ command: 'sleep', args: ['any'] })
+    const subProcess = new SubProcess({ command: 'sleep', args: ['any'] })
     const listener = jest.fn()
 
-    sub_process.on('*', listener)
+    subProcess.on('*', listener)
 
     TestEngine.mockProcessEvents([
       { type: 'stdout', data: 'Command stdout' },
       { type: 'stdout', data: 'Command stdout' }
     ])
 
-    sub_process.run()
+    subProcess.run()
 
-    await sub_process.waitFor('running')
+    await subProcess.waitForStatus(Status.RUNNING)
 
-    await sub_process.kill()
+    await subProcess.stop()
 
-    expect(sub_process.status).toEqual('killed')
-    expect(sub_process.signal).toEqual('SIGTERM')
-    expect(sub_process.exitCode).toBeUndefined()
-    expect(sub_process.stdout).toEqual(Buffer.from('Command stdout'))
-    expect(sub_process.stderr).toEqual(Buffer.from(''))
+    expect(subProcess.status).toEqual(Status.KILLED)
+    expect(subProcess.signal).toEqual('SIGTERM')
+    expect(subProcess.exitCode).toBeUndefined()
+    expect(subProcess.stdout).toEqual(Buffer.from('Command stdout'))
+    expect(subProcess.stderr).toEqual(Buffer.from(''))
 
     expect(listener.mock.calls).toEqual([
-      [{ event: 'running', payload: { process: sub_process } }],
-      [{ event: 'killing', payload: { process: sub_process } }],
-      [{ event: 'stdout', payload: { data: Buffer.from('Command stdout'), process: sub_process } }],
-      [{ event: 'killed', measurement: expect.any(Measurement), payload: { process: sub_process } }],
-      [{ event: 'end', measurement: expect.any(Measurement), payload: { process: sub_process } }]
+      [{ event: 'running', payload: { startedAt: expect.any(Date) } }],
+      [{ event: 'stopping' }],
+      [{ event: 'stdout', payload: { data: Buffer.from('Command stdout') } }],
+      [{ event: 'killed', measurement: expect.any(Measurement) }],
+      [{ event: 'end', measurement: expect.any(Measurement), payload: { endedAt: expect.any(Date) } }]
     ])
 
     expect(TestEngine.commandHistory).toEqual([
@@ -173,34 +172,34 @@ describe(SubProcess, (): void => {
   })
 
   it('is prepared for when a process is killed with a signal', async (): Promise<void> => {
-    const sub_process = new SubProcess({ command: 'sleep', args: ['any'] })
+    const subProcess = new SubProcess({ command: 'sleep', args: ['any'] })
     const listener = jest.fn()
 
-    sub_process.on('*', listener)
+    subProcess.on('*', listener)
 
     TestEngine.mockProcessEvents([
       { type: 'stdout', data: 'Command stdout' },
       { type: 'stdout', data: 'Command stdout' }
     ])
 
-    sub_process.run()
+    subProcess.run()
 
-    await sub_process.waitFor('running')
+    await subProcess.waitFor('running')
 
-    await sub_process.kill('SIGKILL')
+    await subProcess.kill('SIGKILL')
 
-    expect(sub_process.status).toEqual('killed')
-    expect(sub_process.signal).toEqual('SIGKILL')
-    expect(sub_process.exitCode).toBeUndefined()
-    expect(sub_process.stdout).toEqual(Buffer.from('Command stdout'))
-    expect(sub_process.stderr).toEqual(Buffer.from(''))
+    expect(subProcess.status).toEqual(Status.KILLED)
+    expect(subProcess.signal).toEqual('SIGKILL')
+    expect(subProcess.exitCode).toBeUndefined()
+    expect(subProcess.stdout).toEqual(Buffer.from('Command stdout'))
+    expect(subProcess.stderr).toEqual(Buffer.from(''))
 
     expect(listener.mock.calls).toEqual([
-      [{ event: 'running', payload: { process: sub_process } }],
-      [{ event: 'killing', payload: { process: sub_process } }],
-      [{ event: 'stdout', payload: { data: Buffer.from('Command stdout'), process: sub_process } }],
-      [{ event: 'killed', measurement: expect.any(Measurement), payload: { process: sub_process } }],
-      [{ event: 'end', measurement: expect.any(Measurement), payload: { process: sub_process } }]
+      [{ event: 'running', payload: { startedAt: expect.any(Date) } }],
+      [{ event: 'killing' }],
+      [{ event: 'stdout', payload: { data: Buffer.from('Command stdout') } }],
+      [{ event: 'killed', measurement: expect.any(Measurement) }],
+      [{ event: 'end', measurement: expect.any(Measurement), payload: { endedAt: expect.any(Date) } }]
     ])
 
     expect(TestEngine.commandHistory).toEqual([
@@ -216,38 +215,31 @@ describe(SubProcess, (): void => {
   })
 
   it('timeouts a process', async (): Promise<void> => {
-    const sub_process = new SubProcess({ command: 'sleep', args: ['any'], timeout: 2, throwIfNotSuccessful: true })
+    const subProcess = new SubProcess({ command: 'sleep', args: ['any'], timeout: 2 })
     const listener = jest.fn()
-    let error: Error
 
-    sub_process.on('*', listener)
+    subProcess.on('*', listener)
 
     TestEngine.mockProcessEvents([
       { type: 'stdout', data: 'Command stdout' },
       { type: 'stdout', data: 'Command stdout' }
     ])
 
-    try {
-      await sub_process.run()
-    } catch (err) {
-      error = err
-    }
+    await subProcess.run()
 
-    expect(sub_process.status).toEqual('killed')
-    expect(sub_process.signal).toEqual('SIGTERM')
-    expect(sub_process.exitCode).toBeUndefined()
-    expect(sub_process.stdout).toEqual(Buffer.from('Command stdout'))
-    expect(sub_process.stderr).toEqual(Buffer.from(''))
-
-    expect(error).toEqual(new Error('Process was killed with signal SIGTERM'))
+    expect(subProcess.status).toEqual(Status.KILLED)
+    expect(subProcess.signal).toEqual('SIGTERM')
+    expect(subProcess.exitCode).toBeUndefined()
+    expect(subProcess.stdout).toEqual(Buffer.from('Command stdout'))
+    expect(subProcess.stderr).toEqual(Buffer.from(''))
 
     expect(listener.mock.calls).toEqual([
-      [{ event: 'running', payload: { process: sub_process } }],
-      [{ event: 'timeout', payload: { process: sub_process } }],
-      [{ event: 'killing', payload: { process: sub_process } }],
-      [{ event: 'stdout', payload: { data: Buffer.from('Command stdout'), process: sub_process } }],
-      [{ event: 'killed', measurement: expect.any(Measurement), payload: { process: sub_process } }],
-      [{ event: 'end', measurement: expect.any(Measurement), payload: { process: sub_process } }]
+      [{ event: 'running', payload: { startedAt: expect.any(Date) } }],
+      [{ event: 'timeout' }],
+      [{ event: 'killing' }],
+      [{ event: 'stdout', payload: { data: Buffer.from('Command stdout') } }],
+      [{ event: 'killed', measurement: expect.any(Measurement) }],
+      [{ event: 'end', measurement: expect.any(Measurement), payload: { endedAt: expect.any(Date) } }]
     ])
 
     expect(TestEngine.commandHistory).toEqual([
@@ -262,77 +254,117 @@ describe(SubProcess, (): void => {
     ])
   })
 
-  it('pipes an input in different formats to the engine sub_process', async (): Promise<void> => {
-    let sub_process = new SubProcess({ command: 'apt update', input: 'yes' })
-    let input = (sub_process['input'] as Readable).read()
+  it('pipes an input in different formats to the engine subProcess', async (): Promise<void> => {
+    let subProcess = new SubProcess({ command: 'apt update', input: 'yes' })
+    let input = (subProcess['input'] as Readable).read()
 
     expect(input).toEqual(Buffer.from('yes\n'))
 
-    sub_process = new SubProcess({ command: 'apt update', input: Buffer.from('yes') })
-    input = (sub_process['input'] as Readable).read()
+    subProcess = new SubProcess({ command: 'apt update', input: Buffer.from('yes') })
+    input = (subProcess['input'] as Readable).read()
 
     expect(input).toEqual(Buffer.from('yes\n'))
 
-    sub_process = new SubProcess({ command: 'apt update', input: new Readable() })
-    input = (sub_process['input'] as Readable).read()
+    subProcess = new SubProcess({ command: 'apt update', input: new Readable() })
+    input = (subProcess['input'] as Readable).read()
 
     expect(input).toEqual(Buffer.from('\n'))
 
-    sub_process = new SubProcess({ command: 'apt update', input: ['yes', 'sr'] })
-    input = (sub_process['input'] as Readable).read()
+    subProcess = new SubProcess({ command: 'apt update', input: ['yes', 'sr'] })
+    input = (subProcess['input'] as Readable).read()
 
     expect(input).toEqual(Buffer.from('yessr\n'))
 
-    sub_process = new SubProcess({ command: 'apt update', input: [Buffer.from('yes'), Buffer.from('sr')] })
-    input = (sub_process['input'] as Readable).read()
+    subProcess = new SubProcess({ command: 'apt update', input: [Buffer.from('yes'), Buffer.from('sr')] })
+    input = (subProcess['input'] as Readable).read()
 
     expect(input).toEqual(Buffer.from('yessr\n'))
   })
 
   it('emits a warning when the process has already ended', async (): Promise<void> => {
-    const sub_process = new SubProcess({ command: 'echo', args: ['hello'] })
+    const subProcess = new SubProcess({ command: 'echo', args: ['hello'] })
     const listener = jest.fn()
 
-    sub_process.on('*', listener)
+    subProcess.on('*', listener)
 
-    await sub_process.run()
+    await subProcess.run()
 
-    await sub_process.run()
+    await subProcess.run()
 
-    expect(listener).toHaveBeenCalledWith({ event: 'warning', message: 'Process has already ended', payload: { process: sub_process } })
+    expect(listener).toHaveBeenCalledWith({ event: 'warning', message: 'Already ran' })
 
     expect(TestEngine.commandHistory).toEqual([{ command: 'echo', args: ['hello'], input: expect.any(Readable), env: {}, workingDirectory: undefined, events: [] }])
   })
 
-  it('emits an error when the process is already running', async (): Promise<void> => {
-    const sub_process = new SubProcess({ command: 'echo', args: ['hello'] })
+  it('throws when the process has already ended and no error listeners are in place', async (): Promise<void> => {
+    const subProcess = new SubProcess({ command: 'echo', args: ['hello'] })
+
+    await subProcess.run()
+
+    let error: Error
+
+    try {
+      await subProcess.run()
+    } catch (err) {
+      error = err
+    }
+
+    expect(error).toEqual(new Error('Already ran'))
+
+    expect(TestEngine.commandHistory).toEqual([{ command: 'echo', args: ['hello'], input: expect.any(Readable), env: {}, workingDirectory: undefined, events: [] }])
+  })
+
+  it('emits a warning when the process is already running', async (): Promise<void> => {
+    const subProcess = new SubProcess({ command: 'echo', args: ['hello'] })
     const listener = jest.fn()
 
-    sub_process.on('*', listener)
+    subProcess.on('*', listener)
 
-    const promise = sub_process.run()
+    const promise = subProcess.run()
 
-    await sub_process.waitFor('running')
+    await subProcess.waitFor('running')
 
-    sub_process.run()
+    subProcess.run()
 
     await promise
 
-    expect(listener).toHaveBeenCalledWith({ event: 'warning', message: 'Process is already running', payload: { process: sub_process } })
+    expect(listener).toHaveBeenCalledWith({ event: 'warning', message: 'Already running' })
+
+    expect(TestEngine.commandHistory).toEqual([{ command: 'echo', args: ['hello'], input: expect.any(Readable), env: {}, workingDirectory: undefined, events: [] }])
+  })
+
+  it('throws when the process is already running and no error listeners are in place', async (): Promise<void> => {
+    const subProcess = new SubProcess({ command: 'echo', args: ['hello'] })
+
+    const promise = subProcess.run()
+
+    await subProcess.waitForStatus(Status.RUNNING)
+
+    let error: Error
+
+    try {
+      await subProcess.run()
+    } catch (err) {
+      error = err
+    }
+
+    await promise
+
+    expect(error).toEqual(new Error('Already running'))
 
     expect(TestEngine.commandHistory).toEqual([{ command: 'echo', args: ['hello'], input: expect.any(Readable), env: {}, workingDirectory: undefined, events: [] }])
   })
 
   it('Sets adapters from string', async (): Promise<void> => {
-    const sub_process = new SubProcess({ engine: 'exec', command: 'sleep' })
+    const subProcess = new SubProcess({ engine: 'exec', command: 'sleep' })
 
-    expect(sub_process).toMatchObject({ engine: expect.any(ExecEngine) })
+    expect(subProcess).toMatchObject({ engine: expect.any(ExecEngine) })
   })
 
   it('Sets adapters from objects', async (): Promise<void> => {
     const engine = new ExecEngine()
-    const sub_process = new SubProcess({ engine, command: 'sleep' })
+    const subProcess = new SubProcess({ engine, command: 'sleep' })
 
-    expect(sub_process).toMatchObject({ engine })
+    expect(subProcess).toMatchObject({ engine })
   })
 })

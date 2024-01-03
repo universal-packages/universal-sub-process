@@ -19,11 +19,11 @@ SubProcess is the main interface to setup a process to run at whenever time and 
 ```js
 import { SubProcess } from '@universal-packages/sub-process'
 
-const sub_process = new SubProcess({ command: 'echo', args: ['$VARIABLE'], env: { VARIABLE: 'value' } })
+const subProcess = new SubProcess({ command: 'echo', args: ['$VARIABLE'], env: { VARIABLE: 'value' } })
 
-await sub_process.run()
+await subProcess.run()
 
-console.log(sub_process.stdout.toString())
+console.log(subProcess.stdout.toString())
 ```
 
 ### Options
@@ -85,7 +85,7 @@ Signal that killed the process.
 
 Process id of the process.
 
-#### **`status`** **`idle | running | success | error | failure | killed`**
+#### **`status`** **`idle | running | success | error | failure | killed | stopped | killing | stopping`**
 
 Status of the process.
 
@@ -94,18 +94,20 @@ Status of the process.
 `SubProcess` will emit events regarding execution status and output.
 
 ```js
-sub_process.on('*', (event) => console.log(event))
-sub_process.on('running', (event) => console.log(event))
-sub_process.on('stdout', (event) => console.log(event))
-sub_process.on('stderr', (event) => console.log(event))
-sub_process.on('success', (event) => console.log(event))
-sub_process.on('failure', (event) => console.log(event))
-sub_process.on('killing', (event) => console.log(event))
-sub_process.on('killed', (event) => console.log(event))
-sub_process.on('end', (event) => console.log(event))
-sub_process.on('timeout', (event) => console.log(event))
-sub_process.on('error', (event) => console.log(event))
-sub_process.on('warning', (event) => console.log(event))
+subProcess.on('*', (event) => console.log(event))
+subProcess.on('running', (event) => console.log(event))
+subProcess.on('stdout', (event) => console.log(event))
+subProcess.on('stderr', (event) => console.log(event))
+subProcess.on('success', (event) => console.log(event))
+subProcess.on('failure', (event) => console.log(event))
+subProcess.on('killing', (event) => console.log(event))
+subProcess.on('killed', (event) => console.log(event))
+subProcess.on('stopping', (event) => console.log(event))
+subProcess.on('stopped', (event) => console.log(event))
+subProcess.on('end', (event) => console.log(event))
+subProcess.on('timeout', (event) => console.log(event))
+subProcess.on('error', (event) => console.log(event))
+subProcess.on('warning', (event) => console.log(event))
 ```
 
 ## Engine
@@ -115,7 +117,7 @@ To create an engine that suits your requirements you just need to implement new 
 ```js
 import MyEngine from './MyEngine'
 
-const sub_process = new SubProcess({ engine: new MyEngine() })
+const subProcess = new SubProcess({ engine: new MyEngine() })
 ```
 
 You need to implement a engine process representation by subclassify the `EngineProcess` class to provide a way to kill yur custom process.

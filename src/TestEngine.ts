@@ -95,13 +95,13 @@ export default class TestEngine implements EngineInterface {
         if (killWithSignal) {
           testProcess.emit('killed', killWithSignal)
         } else {
-          testProcess.emit('success', 0)
+          testProcess.emit('success')
         }
       } else {
         if (killWithSignal) {
           testProcess.emit('killed', killWithSignal)
         } else {
-          testProcess.emit('success', 0)
+          testProcess.emit('success')
         }
       }
     }, 100)
