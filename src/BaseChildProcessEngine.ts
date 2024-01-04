@@ -20,6 +20,11 @@ export default class BaseChildProcessEngine implements EngineInterface {
       childProcessEngineProcess.emit('failure', error['errno'] || error['code'] || 1)
     })
     childProcess.on('close', (code, signal) => {
+      childProcess.removeAllListeners()
+      childProcess.stdout?.removeAllListeners()
+      childProcess.stderr?.removeAllListeners()
+      childProcess.stdin?.removeAllListeners()
+
       if (code === 0) {
         childProcessEngineProcess.emit('success')
       } else if (signal) {

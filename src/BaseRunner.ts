@@ -171,7 +171,7 @@ export default class BaseRunner<O extends Record<string, any>> extends EventEmit
     throw new Error('Not implemented')
   }
 
-  private handleFailure(): void {
+  protected handleFailure(): void {
     if ([Status.STOPPING].includes(this.internalStatus)) {
       this.internalStatus = Status.STOPPED
       this.failureMessage = this.failureMessage || 'Stopped'
