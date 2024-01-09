@@ -1,7 +1,6 @@
 import { Measurement } from '@universal-packages/time-measurer'
 
-import { ExecEngine, SubProcess } from '../src'
-import { Status } from '../src/BaseRunner.types'
+import { ExecEngine, Status, SubProcess } from '../src'
 
 describe(ExecEngine, (): void => {
   it('runs a given command', async (): Promise<void> => {

@@ -59,7 +59,7 @@ Releases the engine resources in case they need to be disposed after finishing t
 
 Runs the process and waits for it to finish.
 
-#### **`kill()`** **`async`**
+#### **`kill([signal: string])`** **`async`**
 
 Kills the process if it is running.
 

@@ -2,12 +2,22 @@ import { EventEmitter } from '@universal-packages/event-emitter'
 import { Measurement, TimeMeasurer, startMeasurement } from '@universal-packages/time-measurer'
 import ms from 'ms'
 
-import { Status, StatusLevel } from './BaseRunner.types'
+import { Status } from './SubProcess.types'
+
+const STATUS_LEVEL_MAP = {
+  [Status.IDLE]: 0,
+  [Status.RUNNING]: 1,
+  [Status.STOPPING]: 1,
+  [Status.SUCCESS]: 2,
+  [Status.FAILURE]: 2,
+  [Status.ERROR]: 2,
+  [Status.STOPPED]: 2
+}
 
 const LEVEL_STATUSES_MAP = {
   0: [Status.IDLE],
-  1: [Status.RUNNING, Status.STOPPING, Status.KILLING],
-  2: [Status.STOPPED, Status.KILLED, Status.ERROR, Status.SUCCESS]
+  1: [Status.RUNNING, Status.STOPPING],
+  2: [Status.STOPPED, Status.FAILURE, Status.ERROR, Status.SUCCESS]
 }
 
 export default class BaseRunner<O extends Record<string, any>> extends EventEmitter {
@@ -35,6 +45,9 @@ export default class BaseRunner<O extends Record<string, any>> extends EventEmit
   protected internalMeasurement: Measurement
   protected timeMeasurer: TimeMeasurer
   protected failureMessage?: string
+
+  protected stopPromise?: Promise<void>
+  protected stopPromiseSolver?: () => void
 
   private timeout?: NodeJS.Timeout
 
@@ -68,7 +81,7 @@ export default class BaseRunner<O extends Record<string, any>> extends EventEmit
         () => {
           this.emit('timeout')
 
-          this.waitForStatus(Status.RUNNING).then(() => this.kill())
+          this.waitForStatus(Status.RUNNING).then(() => this.stop())
         },
         typeof this.options.timeout === 'string' ? ms(this.options.timeout) : this.options.timeout
       )
@@ -95,6 +108,7 @@ export default class BaseRunner<O extends Record<string, any>> extends EventEmit
 
         this.emit(this.internalStatus, { measurement: this.internalMeasurement })
         this.emit('end', { measurement: this.internalMeasurement, payload: { endedAt: this.endedAt } })
+        if (this.stopPromiseSolver) this.stopPromiseSolver()
       } else {
         this.handleFailure()
       }
@@ -127,28 +141,18 @@ export default class BaseRunner<O extends Record<string, any>> extends EventEmit
       this.internalStatus = Status.STOPPING
       this.emit(this.internalStatus)
 
+      this.stopPromise = new Promise((resolve) => (this.stopPromiseSolver = resolve))
+
       this.internalStop()
     }
 
-    await this.waitForStatus(Status.STOPPED)
-  }
-
-  public async kill(): Promise<void> {
-    if ([Status.IDLE].includes(this.internalStatus)) return
-    if ([Status.RUNNING].includes(this.internalStatus)) {
-      this.internalStatus = Status.KILLING
-      this.emit(this.internalStatus)
-
-      this.internalKill()
-    }
-
-    await this.waitForStatus(Status.KILLED)
+    await this.stopPromise
   }
 
   public async waitForStatus(status: Status): Promise<void> {
-    if (StatusLevel[status] <= StatusLevel[this.internalStatus]) return
+    if (STATUS_LEVEL_MAP[status] <= STATUS_LEVEL_MAP[this.internalStatus]) return
 
-    await Promise.any(LEVEL_STATUSES_MAP[StatusLevel[status]].map((status) => this.waitFor(status)))
+    await Promise.any(LEVEL_STATUSES_MAP[STATUS_LEVEL_MAP[status]].map((status) => this.waitFor(status)))
   }
 
   protected async internalRun(_onRunning: () => void): Promise<void> {
@@ -172,24 +176,17 @@ export default class BaseRunner<O extends Record<string, any>> extends EventEmit
   }
 
   protected handleFailure(): void {
-    // When calling stop() or kill() we internally listen for the status change
-    let selfListeners = 0
-
     if ([Status.STOPPING].includes(this.internalStatus)) {
       this.internalStatus = Status.STOPPED
       this.failureMessage = this.failureMessage || 'Stopped'
-      selfListeners = 1
-    }
-    if ([Status.KILLING].includes(this.internalStatus)) {
-      this.internalStatus = Status.KILLED
-      this.failureMessage = this.failureMessage || 'Killed'
-      selfListeners = 1
     }
 
-    if (this.listenerCount(this.internalStatus) > selfListeners || this.listenerCount('end') > 0) {
+    if (this.listenerCount(this.internalStatus) > 0 || this.listenerCount('end') > 0) {
       this.emit(this.internalStatus, { measurement: this.internalMeasurement })
       this.emit('end', { measurement: this.internalMeasurement, payload: { endedAt: this.endedAt } })
+      if (this.stopPromiseSolver) this.stopPromiseSolver()
     } else {
+      if (this.stopPromiseSolver) this.stopPromiseSolver()
       throw new Error(this.failureMessage)
     }
   }

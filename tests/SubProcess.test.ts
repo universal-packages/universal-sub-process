@@ -1,8 +1,7 @@
 import { Measurement } from '@universal-packages/time-measurer'
 import { Readable } from 'stream'
 
-import { ExecEngine, SubProcess, TestEngine } from '../src'
-import { Status } from '../src/BaseRunner.types'
+import { ExecEngine, Status, SubProcess, TestEngine } from '../src'
 
 beforeEach((): void => {
   TestEngine.reset()
@@ -153,7 +152,7 @@ describe(SubProcess, (): void => {
 
     expect(listener.mock.calls).toEqual([
       [{ event: 'running', payload: { startedAt: expect.any(Date) } }],
-      [{ event: 'stopping' }],
+      [{ event: 'killing' }],
       [{ event: 'stdout', payload: { data: Buffer.from('Command stdout') } }],
       [{ event: 'killed', measurement: expect.any(Measurement) }],
       [{ event: 'end', measurement: expect.any(Measurement), payload: { endedAt: expect.any(Date) } }]

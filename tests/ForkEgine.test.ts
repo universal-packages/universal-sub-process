@@ -1,7 +1,6 @@
 import { Measurement } from '@universal-packages/time-measurer'
 
-import { ForkEngine, SubProcess } from '../src'
-import { Status } from '../src/BaseRunner.types'
+import { ForkEngine, Status, SubProcess } from '../src'
 
 describe(ForkEngine, (): void => {
   it('runs a given command', async (): Promise<void> => {
@@ -57,7 +56,7 @@ describe(ForkEngine, (): void => {
 
     await subProcess.waitFor('running')
 
-    await subProcess.kill()
+    await subProcess.stop()
 
     expect(subProcess.status).toEqual(Status.KILLED)
     expect(subProcess.signal).toEqual('SIGTERM')

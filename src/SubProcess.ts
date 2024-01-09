@@ -3,12 +3,11 @@ import { checkDirectory } from '@universal-packages/fs-utils'
 import { Readable } from 'stream'
 
 import BaseRunner from './BaseRunner'
-import { Status } from './BaseRunner.types'
 import EngineProcess from './EngineProcess'
 import ExecEngine from './ExecEngine'
 import ForkEngine from './ForkEngine'
 import SpawnEngine from './SpawnEngine'
-import { EngineInterface, EngineInterfaceClass, SubProcessOptions } from './SubProcess.types'
+import { EngineInterface, EngineInterfaceClass, Status, SubProcessOptions } from './SubProcess.types'
 import TestEngine from './TestEngine'
 
 export default class SubProcess extends BaseRunner<SubProcessOptions> {
@@ -56,10 +55,23 @@ export default class SubProcess extends BaseRunner<SubProcessOptions> {
     this.engine = this.generateEngine()
   }
 
-  public async kill(signal?: NodeJS.Signals | number): Promise<void> {
-    if (this.killWithSignal === undefined) this.killWithSignal = signal || null
+  public async stop(): Promise<void> {
+    return this.kill()
+  }
 
-    await super.kill()
+  public async kill(signal?: NodeJS.Signals | number): Promise<void> {
+    if ([Status.IDLE].includes(this.internalStatus)) return
+    if ([Status.RUNNING].includes(this.internalStatus)) {
+      this.killWithSignal = signal || null
+      this.internalStatus = Status.KILLING
+      this.emit(this.internalStatus)
+
+      this.stopPromise = new Promise((resolve) => (this.stopPromiseSolver = resolve))
+
+      this.internalStop()
+    }
+
+    await this.stopPromise
   }
 
   protected async internalRun(onRunning: () => void): Promise<void> {
