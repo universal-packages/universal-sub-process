@@ -172,16 +172,21 @@ export default class BaseRunner<O extends Record<string, any>> extends EventEmit
   }
 
   protected handleFailure(): void {
+    // When calling stop() or kill() we internally listen for the status change
+    let selfListeners = 0
+
     if ([Status.STOPPING].includes(this.internalStatus)) {
       this.internalStatus = Status.STOPPED
       this.failureMessage = this.failureMessage || 'Stopped'
+      selfListeners = 1
     }
     if ([Status.KILLING].includes(this.internalStatus)) {
       this.internalStatus = Status.KILLED
       this.failureMessage = this.failureMessage || 'Killed'
+      selfListeners = 1
     }
 
-    if (this.listenerCount(this.internalStatus) > 0 || this.listenerCount('end') > 0) {
+    if (this.listenerCount(this.internalStatus) > selfListeners || this.listenerCount('end') > 0) {
       this.emit(this.internalStatus, { measurement: this.internalMeasurement })
       this.emit('end', { measurement: this.internalMeasurement, payload: { endedAt: this.endedAt } })
     } else {

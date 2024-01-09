@@ -63,6 +63,10 @@ Runs the process and waits for it to finish.
 
 Kills the process if it is running.
 
+#### **`waitForStatus(status: string)`** **`async`**
+
+Waits for the process to reach a specific status or an status in the same level, for example `success` or `failure` will wait for the process to finish with any of those statuses.
+
 ### Instance properties
 
 #### **`stdout`** **`Buffer`**
