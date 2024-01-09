@@ -64,6 +64,7 @@ export default class SubProcess extends BaseRunner<SubProcessOptions> {
     if ([Status.RUNNING].includes(this.internalStatus)) {
       this.killWithSignal = signal || null
       this.internalStatus = Status.KILLING
+      this.failureMessage = `Process killed with signal ${signal || 'SIGTERM'}`
       this.emit(this.internalStatus)
 
       this.stopPromise = new Promise((resolve) => (this.stopPromiseSolver = resolve))

@@ -88,15 +88,21 @@ export default class BaseRunner<O extends Record<string, any>> extends EventEmit
     }
 
     try {
-      await this.prepare()
+      try {
+        await this.prepare()
 
-      await this.internalRun(() => {
-        this.internalStatus = Status.RUNNING
-        this.timeMeasurer = startMeasurement()
-        this.internalStartedAt = Date.now()
+        await this.internalRun(() => {
+          this.internalStatus = Status.RUNNING
+          this.timeMeasurer = startMeasurement()
+          this.internalStartedAt = Date.now()
 
-        this.emit(this.internalStatus, { payload: { startedAt: this.startedAt } })
-      })
+          this.emit(this.internalStatus, { payload: { startedAt: this.startedAt } })
+        })
+      } catch (error) {
+        this.internalStatus = Status.ERROR
+
+        throw error
+      }
 
       clearTimeout(this.timeout)
 
@@ -113,14 +119,14 @@ export default class BaseRunner<O extends Record<string, any>> extends EventEmit
         this.handleFailure()
       }
     } catch (error) {
-      this.internalStatus = Status.ERROR
-
       if (this.listenerCount('error') > 0) {
         this.emit('error', { error })
       } else {
         throw error
       }
     } finally {
+      clearTimeout(this.timeout)
+
       try {
         await this.release()
       } catch (error) {
