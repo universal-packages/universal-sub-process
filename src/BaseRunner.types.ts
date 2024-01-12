@@ -1,4 +1,4 @@
-export enum BaseStatus {
+export enum Status {
   IDLE = 'idle',
   RUNNING = 'running',
   SUCCESS = 'success',

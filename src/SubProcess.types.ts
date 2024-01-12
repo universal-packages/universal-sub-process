@@ -2,18 +2,6 @@ import { Readable } from 'stream'
 
 import EngineProcess from './EngineProcess'
 
-export enum Status {
-  IDLE = 'idle',
-  RUNNING = 'running',
-  SUCCESS = 'success',
-  ERROR = 'error',
-  FAILURE = 'failure',
-  STOPPING = 'stopping',
-  STOPPED = 'stopped',
-  KILLING = 'killing',
-  KILLED = 'killed'
-}
-
 export interface SubProcessOptions {
   args?: string[]
   command: string

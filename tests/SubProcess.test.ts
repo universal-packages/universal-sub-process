@@ -144,7 +144,7 @@ describe(SubProcess, (): void => {
 
     await subProcess.stop()
 
-    expect(subProcess.status).toEqual(Status.KILLED)
+    expect(subProcess.status).toEqual(Status.STOPPED)
     expect(subProcess.signal).toEqual('SIGTERM')
     expect(subProcess.exitCode).toBeUndefined()
     expect(subProcess.stdout).toEqual(Buffer.from('Command stdout'))
@@ -152,9 +152,9 @@ describe(SubProcess, (): void => {
 
     expect(listener.mock.calls).toEqual([
       [{ event: 'running', payload: { startedAt: expect.any(Date) } }],
-      [{ event: 'killing' }],
+      [{ event: 'stopping' }],
       [{ event: 'stdout', payload: { data: Buffer.from('Command stdout') } }],
-      [{ event: 'killed', measurement: expect.any(Measurement) }],
+      [{ event: 'stopped', measurement: expect.any(Measurement) }],
       [{ event: 'end', measurement: expect.any(Measurement), payload: { endedAt: expect.any(Date) } }]
     ])
 
@@ -187,7 +187,7 @@ describe(SubProcess, (): void => {
 
     await subProcess.kill('SIGKILL')
 
-    expect(subProcess.status).toEqual(Status.KILLED)
+    expect(subProcess.status).toEqual(Status.STOPPED)
     expect(subProcess.signal).toEqual('SIGKILL')
     expect(subProcess.exitCode).toBeUndefined()
     expect(subProcess.stdout).toEqual(Buffer.from('Command stdout'))
@@ -195,9 +195,9 @@ describe(SubProcess, (): void => {
 
     expect(listener.mock.calls).toEqual([
       [{ event: 'running', payload: { startedAt: expect.any(Date) } }],
-      [{ event: 'killing' }],
+      [{ event: 'stopping' }],
       [{ event: 'stdout', payload: { data: Buffer.from('Command stdout') } }],
-      [{ event: 'killed', measurement: expect.any(Measurement) }],
+      [{ event: 'stopped', measurement: expect.any(Measurement) }],
       [{ event: 'end', measurement: expect.any(Measurement), payload: { endedAt: expect.any(Date) } }]
     ])
 
@@ -226,7 +226,7 @@ describe(SubProcess, (): void => {
 
     await subProcess.run()
 
-    expect(subProcess.status).toEqual(Status.KILLED)
+    expect(subProcess.status).toEqual(Status.STOPPED)
     expect(subProcess.signal).toEqual('SIGTERM')
     expect(subProcess.exitCode).toBeUndefined()
     expect(subProcess.stdout).toEqual(Buffer.from('Command stdout'))
@@ -235,9 +235,9 @@ describe(SubProcess, (): void => {
     expect(listener.mock.calls).toEqual([
       [{ event: 'running', payload: { startedAt: expect.any(Date) } }],
       [{ event: 'timeout' }],
-      [{ event: 'killing' }],
+      [{ event: 'stopping' }],
       [{ event: 'stdout', payload: { data: Buffer.from('Command stdout') } }],
-      [{ event: 'killed', measurement: expect.any(Measurement) }],
+      [{ event: 'stopped', measurement: expect.any(Measurement) }],
       [{ event: 'end', measurement: expect.any(Measurement), payload: { endedAt: expect.any(Date) } }]
     ])
 

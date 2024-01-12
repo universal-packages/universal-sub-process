@@ -2,7 +2,7 @@ import { EventEmitter } from '@universal-packages/event-emitter'
 import { Measurement, TimeMeasurer, startMeasurement } from '@universal-packages/time-measurer'
 import ms from 'ms'
 
-import { Status } from './SubProcess.types'
+import { Status } from './BaseRunner.types'
 
 const STATUS_LEVEL_MAP = {
   [Status.IDLE]: 0,
@@ -23,8 +23,8 @@ const LEVEL_STATUSES_MAP = {
 export default class BaseRunner<O extends Record<string, any>> extends EventEmitter {
   public readonly options: O
 
-  public get status(): Status {
-    return this.internalStatus
+  public get status(): string {
+    return this.internalStatus as Status
   }
 
   public get startedAt(): Date {
@@ -88,6 +88,8 @@ export default class BaseRunner<O extends Record<string, any>> extends EventEmit
     }
 
     try {
+      let onRunCalled = false
+
       try {
         await this.prepare()
 
@@ -95,6 +97,7 @@ export default class BaseRunner<O extends Record<string, any>> extends EventEmit
           this.internalStatus = Status.RUNNING
           this.timeMeasurer = startMeasurement()
           this.internalStartedAt = Date.now()
+          onRunCalled = true
 
           this.emit(this.internalStatus, { payload: { startedAt: this.startedAt } })
         })
@@ -104,9 +107,15 @@ export default class BaseRunner<O extends Record<string, any>> extends EventEmit
         throw error
       }
 
+      if (!onRunCalled) {
+        this.emit('warning', {
+          message: 'InternalRun never called onRun argument, this runner is not able to communicate when it starts running nor able to measure started time and running time.'
+        })
+      }
+
       clearTimeout(this.timeout)
 
-      this.internalMeasurement = this.timeMeasurer.finish()
+      if (this.timeMeasurer) this.internalMeasurement = this.timeMeasurer.finish()
       this.internalEndedAt = Date.now()
 
       if ([Status.SUCCESS, Status.RUNNING].includes(this.internalStatus)) {
@@ -155,10 +164,10 @@ export default class BaseRunner<O extends Record<string, any>> extends EventEmit
     await this.stopPromise
   }
 
-  public async waitForStatus(status: Status): Promise<void> {
-    if (STATUS_LEVEL_MAP[status] <= STATUS_LEVEL_MAP[this.internalStatus]) return
+  public async waitForStatus(Status: Status): Promise<void> {
+    if (STATUS_LEVEL_MAP[Status] <= STATUS_LEVEL_MAP[this.internalStatus]) return
 
-    await Promise.any(LEVEL_STATUSES_MAP[STATUS_LEVEL_MAP[status]].map((status) => this.waitFor(status)))
+    await Promise.any(LEVEL_STATUSES_MAP[STATUS_LEVEL_MAP[Status]].map((Status) => this.waitFor(Status)))
   }
 
   protected async internalRun(_onRunning: () => void): Promise<void> {

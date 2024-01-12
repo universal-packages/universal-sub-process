@@ -73,7 +73,7 @@ tsconfig.json\n`)
 
     await subProcess.kill()
 
-    expect(subProcess.status).toEqual(Status.KILLED)
+    expect(subProcess.status).toEqual(Status.STOPPED)
     expect(subProcess.signal).toEqual('SIGTERM')
     expect(subProcess.exitCode).toBeUndefined()
     expect(subProcess.stdout).toEqual(Buffer.from(''))
@@ -81,8 +81,8 @@ tsconfig.json\n`)
 
     expect(listener.mock.calls).toEqual([
       [{ event: 'running', payload: { startedAt: expect.any(Date) } }],
-      [{ event: 'killing' }],
-      [{ event: 'killed', measurement: expect.any(Measurement) }],
+      [{ event: 'stopping' }],
+      [{ event: 'stopped', measurement: expect.any(Measurement) }],
       [{ event: 'end', measurement: expect.any(Measurement), payload: { endedAt: expect.any(Date) } }]
     ])
   })
