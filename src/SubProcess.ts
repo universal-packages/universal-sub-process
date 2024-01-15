@@ -96,7 +96,7 @@ export default class SubProcess extends BaseRunner<SubProcessOptions> {
       this.engineProcess.on('failure', (exitCode) => {
         this.internalStatus = Status.FAILURE
         this.internalExitCode = exitCode
-        this.failureMessage = `Process exited with code ${exitCode}\n\n${this.stderr.toString()}`
+        this.error = new Error(`Process exited with code ${exitCode}${this.stderrChunks.length > 0 ? `\n\n${this.stderr}` : ''}`)
 
         this.engineProcess.removeAllListeners()
         this.engineProcess = null

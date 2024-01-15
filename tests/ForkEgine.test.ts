@@ -41,8 +41,8 @@ describe(ForkEngine, (): void => {
 
     expect(listener.mock.calls).toEqual([
       [{ event: 'running', payload: { startedAt: expect.any(Date) } }],
-      [{ event: 'failure', measurement: expect.any(Measurement) }],
-      [{ event: 'end', measurement: expect.any(Measurement), payload: { endedAt: expect.any(Date) } }]
+      [{ event: 'failure', error: new Error('Process exited with code 1'), measurement: expect.any(Measurement) }],
+      [{ event: 'end', error: new Error('Process exited with code 1'), measurement: expect.any(Measurement), payload: { endedAt: expect.any(Date) } }]
     ])
   })
 

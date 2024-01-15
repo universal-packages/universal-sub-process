@@ -44,7 +44,7 @@ export default class BaseRunner<O extends Record<string, any>> extends EventEmit
   protected internalEndedAt: number
   protected internalMeasurement: Measurement
   protected timeMeasurer: TimeMeasurer
-  protected failureMessage?: string
+  protected error?: Error
 
   protected stopPromise?: Promise<void>
   protected stopPromiseSolver?: () => void
@@ -193,16 +193,16 @@ export default class BaseRunner<O extends Record<string, any>> extends EventEmit
   protected handleFailure(): void {
     if ([Status.STOPPING].includes(this.internalStatus)) {
       this.internalStatus = Status.STOPPED
-      this.failureMessage = this.failureMessage || 'Stopped'
+      this.error = this.error || new Error('Stopped')
     }
 
     if (this.listenerCount(this.internalStatus) > 0 || this.listenerCount('end') > 0) {
-      this.emit(this.internalStatus, { measurement: this.internalMeasurement })
-      this.emit('end', { measurement: this.internalMeasurement, payload: { endedAt: this.endedAt } })
+      this.emit(this.internalStatus, { error: this.error, measurement: this.internalMeasurement })
+      this.emit('end', { error: this.error, measurement: this.internalMeasurement, payload: { endedAt: this.endedAt } })
       if (this.stopPromiseSolver) this.stopPromiseSolver()
     } else {
       if (this.stopPromiseSolver) this.stopPromiseSolver()
-      throw new Error(this.failureMessage)
+      throw this.error
     }
   }
 }

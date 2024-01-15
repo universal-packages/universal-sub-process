@@ -55,8 +55,15 @@ tsconfig.json\n`)
     expect(listener.mock.calls).toEqual([
       [{ event: 'running', payload: { startedAt: expect.any(Date) } }],
       [{ event: 'stderr', payload: { data: expect.any(Buffer) } }],
-      [{ event: 'failure', measurement: expect.any(Measurement) }],
-      [{ event: 'end', measurement: expect.any(Measurement), payload: { endedAt: expect.any(Date) } }]
+      [{ event: 'failure', error: new Error("Process exited with code 128\n\nfatal: repository 'nonexistent' does not exist\n"), measurement: expect.any(Measurement) }],
+      [
+        {
+          event: 'end',
+          error: new Error("Process exited with code 128\n\nfatal: repository 'nonexistent' does not exist\n"),
+          measurement: expect.any(Measurement),
+          payload: { endedAt: expect.any(Date) }
+        }
+      ]
     ])
   })
 

@@ -76,8 +76,8 @@ describe(SubProcess, (): void => {
     expect(listener.mock.calls).toEqual([
       [{ event: 'running', payload: { startedAt: expect.any(Date) } }],
       [{ event: 'stderr', payload: { data: Buffer.from('Command failure') } }],
-      [{ event: 'failure', measurement: expect.any(Measurement) }],
-      [{ event: 'end', measurement: expect.any(Measurement), payload: { endedAt: expect.any(Date) } }]
+      [{ event: 'failure', error: new Error('Process exited with code 1\n\nCommand failure'), measurement: expect.any(Measurement) }],
+      [{ event: 'end', error: new Error('Process exited with code 1\n\nCommand failure'), measurement: expect.any(Measurement), payload: { endedAt: expect.any(Date) } }]
     ])
 
     expect(TestEngine.commandHistory).toEqual([
