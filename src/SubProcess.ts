@@ -33,6 +33,7 @@ export default class SubProcess extends BaseRunner<SubProcessOptions> {
   }
 
   private readonly engine: EngineInterface
+  private readonly isMyEngine: boolean
   private readonly input: Readable
   private readonly command: string
   private readonly args: string[]
@@ -53,7 +54,10 @@ export default class SubProcess extends BaseRunner<SubProcessOptions> {
     this.args = this.extractArgs(options.command, options.args)
     this.env = options.env || {}
     this.input = this.generateInputStream(options.input)
-    this.engine = this.generateEngine()
+
+    const engineResult = this.generateEngine()
+    this.engine = engineResult.engine
+    this.isMyEngine = engineResult.isMine
   }
 
   public async kill(signal?: NodeJS.Signals | number): Promise<void> {
@@ -125,11 +129,11 @@ export default class SubProcess extends BaseRunner<SubProcessOptions> {
   }
 
   protected async internalPrepare(): Promise<void> {
-    if (this.engine.prepare) await this.engine.prepare()
+    if (this.isMyEngine && this.engine.prepare) await this.engine.prepare()
   }
 
   protected async internalRelease(): Promise<void> {
-    if (this.engine.release) await this.engine.release()
+    if (this.isMyEngine && this.engine.release) await this.engine.release()
   }
 
   private extractCommand(command: string): string {
@@ -174,7 +178,7 @@ export default class SubProcess extends BaseRunner<SubProcessOptions> {
     }
   }
 
-  private generateEngine(): EngineInterface {
+  private generateEngine(): { engine: EngineInterface; isMine: boolean } {
     if (typeof this.options.engine === 'string') {
       const AdapterModule = resolveAdapter<EngineInterfaceClass>({
         name: this.options.engine,
@@ -182,9 +186,9 @@ export default class SubProcess extends BaseRunner<SubProcessOptions> {
         type: 'engine',
         internal: { exec: ExecEngine, fork: ForkEngine, spawn: SpawnEngine, test: TestEngine }
       })
-      return new AdapterModule(this.options.engineOptions)
+      return { engine: new AdapterModule(this.options.engineOptions), isMine: true }
     } else {
-      return this.options.engine
+      return { engine: this.options.engine, isMine: false }
     }
   }
 }
