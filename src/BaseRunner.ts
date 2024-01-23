@@ -40,11 +40,11 @@ export default class BaseRunner<O extends Record<string, any>> extends EventEmit
   }
 
   protected internalStatus: Status = Status.IDLE
+  protected internalError?: Error
   protected internalStartedAt: number
   protected internalEndedAt: number
   protected internalMeasurement: Measurement
   protected timeMeasurer: TimeMeasurer
-  protected error?: Error
 
   protected stopPromise?: Promise<void>
   protected stopPromiseSolver?: () => void
@@ -91,7 +91,7 @@ export default class BaseRunner<O extends Record<string, any>> extends EventEmit
       let onRunCalled = false
 
       try {
-        if (this.prepare) await this.prepare()
+        await this.internalPrepare()
 
         await this.internalRun(() => {
           this.internalStatus = Status.RUNNING
@@ -137,7 +137,7 @@ export default class BaseRunner<O extends Record<string, any>> extends EventEmit
       clearTimeout(this.timeout)
 
       try {
-        if (this.release) await this.release()
+        await this.internalRelease()
       } catch (error) {
         this.internalStatus = Status.ERROR
 
@@ -178,31 +178,27 @@ export default class BaseRunner<O extends Record<string, any>> extends EventEmit
     throw new Error('Not implemented')
   }
 
-  protected internalKill(): void {
-    throw new Error('Not implemented')
+  protected async internalPrepare(): Promise<void> {
+    // Not required
   }
 
-  protected async prepare(): Promise<void> {
-    throw new Error('Not implemented')
-  }
-
-  protected async release(): Promise<void> {
-    throw new Error('Not implemented')
+  protected async internalRelease(): Promise<void> {
+    // Not required
   }
 
   protected handleFailure(): void {
     if ([Status.STOPPING].includes(this.internalStatus)) {
       this.internalStatus = Status.STOPPED
-      this.error = this.error || new Error('Stopped')
+      this.internalError = this.internalError || new Error('Stopped')
     }
 
     if (this.listenerCount(this.internalStatus) > 0 || this.listenerCount('end') > 0) {
-      this.emit(this.internalStatus, { error: this.error, measurement: this.internalMeasurement })
-      this.emit('end', { error: this.error, measurement: this.internalMeasurement, payload: { endedAt: this.endedAt } })
+      this.emit(this.internalStatus, { error: this.internalError, measurement: this.internalMeasurement })
+      this.emit('end', { error: this.internalError, measurement: this.internalMeasurement, payload: { endedAt: this.endedAt } })
       if (this.stopPromiseSolver) this.stopPromiseSolver()
     } else {
       if (this.stopPromiseSolver) this.stopPromiseSolver()
-      throw this.error
+      throw this.internalError
     }
   }
 }

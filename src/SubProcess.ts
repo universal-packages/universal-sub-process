@@ -96,7 +96,7 @@ export default class SubProcess extends BaseRunner<SubProcessOptions> {
       this.engineProcess.on('failure', (exitCode) => {
         this.internalStatus = Status.FAILURE
         this.internalExitCode = exitCode
-        this.error = new Error(`Process exited with code ${exitCode}${this.stderrChunks.length > 0 ? `\n\n${this.stderr}` : ''}`)
+        this.internalError = new Error(`Process exited with code ${exitCode}${this.stderrChunks.length > 0 ? `\n\n${this.stderr}` : ''}`)
 
         this.engineProcess.removeAllListeners()
         this.engineProcess = null
@@ -124,11 +124,11 @@ export default class SubProcess extends BaseRunner<SubProcessOptions> {
     await this.internalKill()
   }
 
-  protected async prepare(): Promise<void> {
+  protected async internalPrepare(): Promise<void> {
     if (this.engine.prepare) await this.engine.prepare()
   }
 
-  protected async release(): Promise<void> {
+  protected async internalRelease(): Promise<void> {
     if (this.engine.release) await this.engine.release()
   }
 
