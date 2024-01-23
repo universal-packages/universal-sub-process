@@ -91,7 +91,7 @@ export default class BaseRunner<O extends Record<string, any>> extends EventEmit
       let onRunCalled = false
 
       try {
-        await this.prepare()
+        if (this.prepare) await this.prepare()
 
         await this.internalRun(() => {
           this.internalStatus = Status.RUNNING
@@ -137,7 +137,7 @@ export default class BaseRunner<O extends Record<string, any>> extends EventEmit
       clearTimeout(this.timeout)
 
       try {
-        await this.release()
+        if (this.release) await this.release()
       } catch (error) {
         this.internalStatus = Status.ERROR
 
