@@ -24,8 +24,8 @@ describe(SubProcess, (): void => {
     expect(subProcess.status).toEqual(Status.SUCCESS)
     expect(subProcess.signal).toBeUndefined()
     expect(subProcess.exitCode).toEqual(0)
-    expect(subProcess.stdout).toEqual(Buffer.from('Command stdoutCommand stdout'))
-    expect(subProcess.stderr).toEqual(Buffer.from(''))
+    expect(subProcess.stdout).toEqual('Command stdoutCommand stdout')
+    expect(subProcess.stderr).toEqual('')
     expect(subProcess.processId).toBeGreaterThan(0)
     expect(subProcess.measurement).toBeInstanceOf(Measurement)
     expect(subProcess.startedAt).toBeInstanceOf(Date)
@@ -33,8 +33,8 @@ describe(SubProcess, (): void => {
 
     expect(listener.mock.calls).toEqual([
       [{ event: 'running', payload: { startedAt: expect.any(Date) } }],
-      [{ event: 'stdout', payload: { data: Buffer.from('Command stdout') } }],
-      [{ event: 'stdout', payload: { data: Buffer.from('Command stdout') } }],
+      [{ event: 'stdout', payload: { data: 'Command stdout' } }],
+      [{ event: 'stdout', payload: { data: 'Command stdout' } }],
       [{ event: 'success', measurement: expect.any(Measurement) }],
       [{ event: 'end', measurement: expect.any(Measurement), payload: { endedAt: expect.any(Date) } }]
     ])
@@ -70,12 +70,12 @@ describe(SubProcess, (): void => {
     expect(subProcess.status).toEqual(Status.FAILURE)
     expect(subProcess.signal).toBeUndefined()
     expect(subProcess.exitCode).toEqual(1)
-    expect(subProcess.stdout).toEqual(Buffer.from(''))
-    expect(subProcess.stderr).toEqual(Buffer.from('Command failure'))
+    expect(subProcess.stdout).toEqual('')
+    expect(subProcess.stderr).toEqual('Command failure')
 
     expect(listener.mock.calls).toEqual([
       [{ event: 'running', payload: { startedAt: expect.any(Date) } }],
-      [{ event: 'stderr', payload: { data: Buffer.from('Command failure') } }],
+      [{ event: 'stderr', payload: { data: 'Command failure' } }],
       [{ event: 'failure', error: new Error('Process exited with code 1\n\nCommand failure'), measurement: expect.any(Measurement) }],
       [{ event: 'end', error: new Error('Process exited with code 1\n\nCommand failure'), measurement: expect.any(Measurement), payload: { endedAt: expect.any(Date) } }]
     ])
@@ -110,8 +110,8 @@ describe(SubProcess, (): void => {
     expect(subProcess.status).toEqual(Status.ERROR)
     expect(subProcess.signal).toBeUndefined()
     expect(subProcess.exitCode).toBeUndefined()
-    expect(subProcess.stdout).toEqual(Buffer.from(''))
-    expect(subProcess.stderr).toEqual(Buffer.from(''))
+    expect(subProcess.stdout).toEqual('')
+    expect(subProcess.stderr).toEqual('')
 
     expect(error).toEqual(new Error('Command error'))
 
@@ -147,13 +147,13 @@ describe(SubProcess, (): void => {
     expect(subProcess.status).toEqual(Status.STOPPED)
     expect(subProcess.signal).toEqual('SIGTERM')
     expect(subProcess.exitCode).toBeUndefined()
-    expect(subProcess.stdout).toEqual(Buffer.from('Command stdout'))
-    expect(subProcess.stderr).toEqual(Buffer.from(''))
+    expect(subProcess.stdout).toEqual('Command stdout')
+    expect(subProcess.stderr).toEqual('')
 
     expect(listener.mock.calls).toEqual([
       [{ event: 'running', payload: { startedAt: expect.any(Date) } }],
       [{ event: 'stopping' }],
-      [{ event: 'stdout', payload: { data: Buffer.from('Command stdout') } }],
+      [{ event: 'stdout', payload: { data: 'Command stdout' } }],
       [{ event: 'stopped', measurement: expect.any(Measurement) }],
       [{ event: 'end', measurement: expect.any(Measurement), payload: { endedAt: expect.any(Date) } }]
     ])
@@ -190,13 +190,13 @@ describe(SubProcess, (): void => {
     expect(subProcess.status).toEqual(Status.STOPPED)
     expect(subProcess.signal).toEqual('SIGKILL')
     expect(subProcess.exitCode).toBeUndefined()
-    expect(subProcess.stdout).toEqual(Buffer.from('Command stdout'))
-    expect(subProcess.stderr).toEqual(Buffer.from(''))
+    expect(subProcess.stdout).toEqual('Command stdout')
+    expect(subProcess.stderr).toEqual('')
 
     expect(listener.mock.calls).toEqual([
       [{ event: 'running', payload: { startedAt: expect.any(Date) } }],
       [{ event: 'stopping' }],
-      [{ event: 'stdout', payload: { data: Buffer.from('Command stdout') } }],
+      [{ event: 'stdout', payload: { data: 'Command stdout' } }],
       [{ event: 'stopped', measurement: expect.any(Measurement) }],
       [{ event: 'end', measurement: expect.any(Measurement), payload: { endedAt: expect.any(Date) } }]
     ])
@@ -229,14 +229,14 @@ describe(SubProcess, (): void => {
     expect(subProcess.status).toEqual(Status.STOPPED)
     expect(subProcess.signal).toEqual('SIGTERM')
     expect(subProcess.exitCode).toBeUndefined()
-    expect(subProcess.stdout).toEqual(Buffer.from('Command stdout'))
-    expect(subProcess.stderr).toEqual(Buffer.from(''))
+    expect(subProcess.stdout).toEqual('Command stdout')
+    expect(subProcess.stderr).toEqual('')
 
     expect(listener.mock.calls).toEqual([
       [{ event: 'running', payload: { startedAt: expect.any(Date) } }],
       [{ event: 'timeout' }],
       [{ event: 'stopping' }],
-      [{ event: 'stdout', payload: { data: Buffer.from('Command stdout') } }],
+      [{ event: 'stdout', payload: { data: 'Command stdout' } }],
       [{ event: 'stopped', measurement: expect.any(Measurement) }],
       [{ event: 'end', measurement: expect.any(Measurement), payload: { endedAt: expect.any(Date) } }]
     ])
@@ -255,29 +255,29 @@ describe(SubProcess, (): void => {
 
   it('pipes an input in different formats to the engine subProcess', async (): Promise<void> => {
     let subProcess = new SubProcess({ command: 'apt update', input: 'yes' })
-    let input = (subProcess['input'] as Readable).read()
+    let input = (subProcess['input'] as Readable).read().toString()
 
-    expect(input).toEqual(Buffer.from('yes\n'))
+    expect(input).toEqual('yes\n')
 
-    subProcess = new SubProcess({ command: 'apt update', input: Buffer.from('yes') })
-    input = (subProcess['input'] as Readable).read()
+    subProcess = new SubProcess({ command: 'apt update', input: 'yes' })
+    input = (subProcess['input'] as Readable).read().toString()
 
-    expect(input).toEqual(Buffer.from('yes\n'))
+    expect(input).toEqual('yes\n')
 
     subProcess = new SubProcess({ command: 'apt update', input: new Readable() })
-    input = (subProcess['input'] as Readable).read()
+    input = (subProcess['input'] as Readable).read().toString()
 
-    expect(input).toEqual(Buffer.from('\n'))
+    expect(input).toEqual('\n')
 
     subProcess = new SubProcess({ command: 'apt update', input: ['yes', 'sr'] })
-    input = (subProcess['input'] as Readable).read()
+    input = (subProcess['input'] as Readable).read().toString()
 
-    expect(input).toEqual(Buffer.from('yessr\n'))
+    expect(input).toEqual('yessr\n')
 
-    subProcess = new SubProcess({ command: 'apt update', input: [Buffer.from('yes'), Buffer.from('sr')] })
-    input = (subProcess['input'] as Readable).read()
+    subProcess = new SubProcess({ command: 'apt update', input: ['yes', 'sr'] })
+    input = (subProcess['input'] as Readable).read().toString()
 
-    expect(input).toEqual(Buffer.from('yessr\n'))
+    expect(input).toEqual('yessr\n')
   })
 
   it('emits a warning when the process has already ended', async (): Promise<void> => {

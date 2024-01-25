@@ -14,8 +14,8 @@ describe(ForkEngine, (): void => {
     expect(subProcess.status).toEqual(Status.SUCCESS)
     expect(subProcess.signal).toBeUndefined()
     expect(subProcess.exitCode).toEqual(0)
-    expect(subProcess.stderr).toEqual(Buffer.from(''))
-    expect(subProcess.stderr).toEqual(Buffer.from(''))
+    expect(subProcess.stderr).toEqual('')
+    expect(subProcess.stderr).toEqual('')
     expect(subProcess.processId).toBeGreaterThan(0)
 
     expect(listener.mock.calls).toEqual([
@@ -36,8 +36,8 @@ describe(ForkEngine, (): void => {
     expect(subProcess.status).toEqual(Status.FAILURE)
     expect(subProcess.signal).toBeUndefined()
     expect(subProcess.exitCode).toEqual(1)
-    expect(subProcess.stdout).toEqual(Buffer.from(''))
-    expect(subProcess.stderr).toEqual(Buffer.from(''))
+    expect(subProcess.stdout).toEqual('')
+    expect(subProcess.stderr).toEqual('')
 
     expect(listener.mock.calls).toEqual([
       [{ event: 'running', payload: { startedAt: expect.any(Date) } }],
@@ -61,8 +61,8 @@ describe(ForkEngine, (): void => {
     expect(subProcess.status).toEqual(Status.STOPPED)
     expect(subProcess.signal).toEqual('SIGTERM')
     expect(subProcess.exitCode).toBeUndefined()
-    expect(subProcess.stdout).toEqual(Buffer.from(''))
-    expect(subProcess.stderr).toEqual(Buffer.from(''))
+    expect(subProcess.stdout).toEqual('')
+    expect(subProcess.stderr).toEqual('')
 
     expect(listener.mock.calls).toEqual([
       [{ event: 'running', payload: { startedAt: expect.any(Date) } }],
@@ -83,8 +83,8 @@ describe(ForkEngine, (): void => {
     expect(subProcess.status).toEqual(Status.SUCCESS)
     expect(subProcess.signal).toBeUndefined()
     expect(subProcess.exitCode).toEqual(0)
-    expect(subProcess.stderr).toEqual(Buffer.from(''))
-    expect(subProcess.stderr).toEqual(Buffer.from(''))
+    expect(subProcess.stderr).toEqual('')
+    expect(subProcess.stderr).toEqual('')
     expect(subProcess.processId).toBeGreaterThan(0)
 
     expect(listener.mock.calls).toEqual([

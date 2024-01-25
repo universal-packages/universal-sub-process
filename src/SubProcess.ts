@@ -12,12 +12,12 @@ import { EngineInterface, EngineInterfaceClass, SubProcessOptions } from './SubP
 import TestEngine from './TestEngine'
 
 export default class SubProcess extends BaseRunner<SubProcessOptions> {
-  public get stdout(): Buffer {
-    return Buffer.concat(this.stdoutChunks)
+  public get stdout(): string {
+    return Buffer.concat(this.stdoutChunks).toString()
   }
 
-  public get stderr(): Buffer {
-    return Buffer.concat(this.stderrChunks)
+  public get stderr(): string {
+    return Buffer.concat(this.stderrChunks).toString()
   }
 
   public get exitCode(): number {
@@ -78,13 +78,13 @@ export default class SubProcess extends BaseRunner<SubProcessOptions> {
       this.engineProcess.on('stdout', (data) => {
         this.stdoutChunks.push(data)
 
-        this.emit('stdout', { payload: { data } })
+        this.emit('stdout', { payload: { data: data.toString() } })
       })
 
       this.engineProcess.on('stderr', (data) => {
         this.stderrChunks.push(data)
 
-        this.emit('stderr', { payload: { data } })
+        this.emit('stderr', { payload: { data: data.toString() } })
       })
 
       this.engineProcess.on('success', () => {
