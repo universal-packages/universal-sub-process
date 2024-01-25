@@ -69,11 +69,11 @@ Waits for the process to reach a specific status or an status in the same level,
 
 ### Instance properties
 
-#### **`stdout`** **`Buffer`**
+#### **`stdout`** **`string`**
 
 Buffer containing the stdout of the process.
 
-#### **`stderr`** **`Buffer`**
+#### **`stderr`** **`string`**
 
 Buffer containing the stderr of the process.
 
