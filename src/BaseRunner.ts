@@ -23,8 +23,8 @@ const LEVEL_STATUSES_MAP = {
 export default class BaseRunner<O extends Record<string, any>> extends EventEmitter {
   public readonly options: O
 
-  public get status(): string {
-    return this.internalStatus as Status
+  public get status(): Status {
+    return this.internalStatus
   }
 
   public get startedAt(): Date {
