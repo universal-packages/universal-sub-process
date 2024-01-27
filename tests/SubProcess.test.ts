@@ -213,6 +213,27 @@ describe(SubProcess, (): void => {
     ])
   })
 
+  it('is prepared for when a process is skipped', async (): Promise<void> => {
+    const subProcess = new SubProcess({ command: 'sleep', args: ['any'] })
+    const listener = jest.fn()
+
+    subProcess.on('*', listener)
+
+    subProcess.skip('No need to run this command')
+
+    await subProcess.run()
+
+    expect(subProcess.status).toEqual(Status.SKIPPED)
+    expect(subProcess.signal).toBeUndefined()
+    expect(subProcess.exitCode).toBeUndefined()
+    expect(subProcess.stdout).toEqual('')
+    expect(subProcess.stderr).toEqual('')
+
+    expect(listener.mock.calls).toEqual([[{ event: 'skipped', payload: { reason: 'No need to run this command' } }], [{ event: 'warning', message: 'Already skipped' }]])
+
+    expect(TestEngine.commandHistory).toEqual([])
+  })
+
   it('timeouts a process', async (): Promise<void> => {
     const subProcess = new SubProcess({ command: 'sleep', args: ['any'], timeout: 2 })
     const listener = jest.fn()

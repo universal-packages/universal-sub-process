@@ -5,7 +5,8 @@ export enum Status {
   ERROR = 'error',
   FAILURE = 'failure',
   STOPPING = 'stopping',
-  STOPPED = 'stopped'
+  STOPPED = 'stopped',
+  SKIPPED = 'skipped'
 }
 
 export interface BaseRunnerOptions {

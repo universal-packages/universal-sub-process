@@ -65,6 +65,13 @@ export default class BaseRunner<O extends Record<string, any>> extends EventEmit
           throw new Error('Already running')
         }
         return
+      case Status.SKIPPED:
+        if (this.listenerCount('warning') > 0) {
+          this.emit('warning', { message: 'Already skipped' })
+        } else {
+          throw new Error('Already skipped')
+        }
+        return
       case Status.IDLE:
         break
       default:
@@ -162,6 +169,13 @@ export default class BaseRunner<O extends Record<string, any>> extends EventEmit
     }
 
     await this.stopPromise
+  }
+
+  public skip(reason?: string): void {
+    if ([Status.IDLE].includes(this.internalStatus)) {
+      this.internalStatus = Status.SKIPPED
+      reason ? this.emit(this.internalStatus, { payload: { reason } }) : this.emit(this.internalStatus)
+    }
   }
 
   public async waitForStatus(Status: Status): Promise<void> {
