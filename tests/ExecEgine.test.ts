@@ -11,7 +11,7 @@ describe(ExecEngine, (): void => {
 
     await subProcess.run()
 
-    expect(subProcess.status).toEqual(Status.SUCCESS)
+    expect(subProcess.status).toEqual(Status.Success)
     expect(subProcess.signal).toBeUndefined()
     expect(subProcess.exitCode).toEqual(0)
     expect(subProcess.stdout).toMatch(
@@ -65,7 +65,7 @@ tsconfig.json\n`)
 
     await subProcess.run()
 
-    expect(subProcess.status).toEqual(Status.FAILURE)
+    expect(subProcess.status).toEqual(Status.Failure)
     expect(subProcess.signal).toBeUndefined()
     expect(subProcess.exitCode).toEqual(128)
     expect(subProcess.stdout).toEqual('')
@@ -98,7 +98,7 @@ tsconfig.json\n`)
 
     await subProcess.kill()
 
-    expect(subProcess.status).toEqual(Status.STOPPED)
+    expect(subProcess.status).toEqual(Status.Stopped)
     expect(subProcess.signal).toEqual('SIGTERM')
     expect(subProcess.exitCode).toBeUndefined()
     expect(subProcess.stdout).toEqual('')
@@ -120,7 +120,7 @@ tsconfig.json\n`)
 
     await subProcess.run()
 
-    expect(subProcess.status).toEqual(Status.SUCCESS)
+    expect(subProcess.status).toEqual(Status.Success)
     expect(subProcess.signal).toBeUndefined()
     expect(subProcess.exitCode).toEqual(0)
     expect(subProcess.stdout).toEqual('value\n')
@@ -134,7 +134,7 @@ tsconfig.json\n`)
 
     await subProcess.run()
 
-    expect(subProcess.status).toEqual(Status.SUCCESS)
+    expect(subProcess.status).toEqual(Status.Success)
     expect(subProcess.signal).toBeUndefined()
     expect(subProcess.exitCode).toEqual(0)
     expect(subProcess.stdout).toEqual(

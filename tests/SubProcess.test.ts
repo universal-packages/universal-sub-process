@@ -21,7 +21,7 @@ describe(SubProcess, (): void => {
 
     await subProcess.run()
 
-    expect(subProcess.status).toEqual(Status.SUCCESS)
+    expect(subProcess.status).toEqual(Status.Success)
     expect(subProcess.signal).toBeUndefined()
     expect(subProcess.exitCode).toEqual(0)
     expect(subProcess.stdout).toEqual('Command stdoutCommand stdout')
@@ -67,7 +67,7 @@ describe(SubProcess, (): void => {
 
     await subProcess.run()
 
-    expect(subProcess.status).toEqual(Status.FAILURE)
+    expect(subProcess.status).toEqual(Status.Failure)
     expect(subProcess.signal).toBeUndefined()
     expect(subProcess.exitCode).toEqual(1)
     expect(subProcess.stdout).toEqual('')
@@ -107,7 +107,7 @@ describe(SubProcess, (): void => {
       error = err
     }
 
-    expect(subProcess.status).toEqual(Status.ERROR)
+    expect(subProcess.status).toEqual(Status.Error)
     expect(subProcess.signal).toBeUndefined()
     expect(subProcess.exitCode).toBeUndefined()
     expect(subProcess.stdout).toEqual('')
@@ -140,11 +140,11 @@ describe(SubProcess, (): void => {
 
     subProcess.run()
 
-    await subProcess.waitForStatus(Status.RUNNING)
+    await subProcess.waitForStatus(Status.Running)
 
     await subProcess.stop()
 
-    expect(subProcess.status).toEqual(Status.STOPPED)
+    expect(subProcess.status).toEqual(Status.Stopped)
     expect(subProcess.signal).toEqual('SIGTERM')
     expect(subProcess.exitCode).toBeUndefined()
     expect(subProcess.stdout).toEqual('Command stdout')
@@ -187,7 +187,7 @@ describe(SubProcess, (): void => {
 
     await subProcess.kill('SIGKILL')
 
-    expect(subProcess.status).toEqual(Status.STOPPED)
+    expect(subProcess.status).toEqual(Status.Stopped)
     expect(subProcess.signal).toEqual('SIGKILL')
     expect(subProcess.exitCode).toBeUndefined()
     expect(subProcess.stdout).toEqual('Command stdout')
@@ -223,7 +223,7 @@ describe(SubProcess, (): void => {
 
     await subProcess.run()
 
-    expect(subProcess.status).toEqual(Status.SKIPPED)
+    expect(subProcess.status).toEqual(Status.Skipped)
     expect(subProcess.signal).toBeUndefined()
     expect(subProcess.exitCode).toBeUndefined()
     expect(subProcess.stdout).toEqual('')
@@ -247,7 +247,7 @@ describe(SubProcess, (): void => {
 
     await subProcess.run()
 
-    expect(subProcess.status).toEqual(Status.STOPPED)
+    expect(subProcess.status).toEqual(Status.Stopped)
     expect(subProcess.signal).toEqual('SIGTERM')
     expect(subProcess.exitCode).toBeUndefined()
     expect(subProcess.stdout).toEqual('Command stdout')
@@ -358,7 +358,7 @@ describe(SubProcess, (): void => {
 
     const promise = subProcess.run()
 
-    await subProcess.waitForStatus(Status.RUNNING)
+    await subProcess.waitForStatus(Status.Running)
 
     let error: Error
 

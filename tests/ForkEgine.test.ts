@@ -11,7 +11,7 @@ describe(ForkEngine, (): void => {
 
     await subProcess.run()
 
-    expect(subProcess.status).toEqual(Status.SUCCESS)
+    expect(subProcess.status).toEqual(Status.Success)
     expect(subProcess.signal).toBeUndefined()
     expect(subProcess.exitCode).toEqual(0)
     expect(subProcess.stderr).toEqual('')
@@ -33,7 +33,7 @@ describe(ForkEngine, (): void => {
 
     await subProcess.run()
 
-    expect(subProcess.status).toEqual(Status.FAILURE)
+    expect(subProcess.status).toEqual(Status.Failure)
     expect(subProcess.signal).toBeUndefined()
     expect(subProcess.exitCode).toEqual(1)
     expect(subProcess.stdout).toEqual('')
@@ -58,7 +58,7 @@ describe(ForkEngine, (): void => {
 
     await subProcess.stop()
 
-    expect(subProcess.status).toEqual(Status.STOPPED)
+    expect(subProcess.status).toEqual(Status.Stopped)
     expect(subProcess.signal).toEqual('SIGTERM')
     expect(subProcess.exitCode).toBeUndefined()
     expect(subProcess.stdout).toEqual('')
@@ -80,7 +80,7 @@ describe(ForkEngine, (): void => {
 
     await subProcess.run()
 
-    expect(subProcess.status).toEqual(Status.SUCCESS)
+    expect(subProcess.status).toEqual(Status.Success)
     expect(subProcess.signal).toBeUndefined()
     expect(subProcess.exitCode).toEqual(0)
     expect(subProcess.stderr).toEqual('')

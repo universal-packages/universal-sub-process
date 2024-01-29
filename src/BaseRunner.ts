@@ -5,19 +5,20 @@ import ms from 'ms'
 import { Status } from './BaseRunner.types'
 
 const STATUS_LEVEL_MAP = {
-  [Status.IDLE]: 0,
-  [Status.RUNNING]: 1,
-  [Status.STOPPING]: 1,
-  [Status.SUCCESS]: 2,
-  [Status.FAILURE]: 2,
-  [Status.ERROR]: 2,
-  [Status.STOPPED]: 2
+  [Status.Idle]: 0,
+  [Status.Running]: 1,
+  [Status.Stopping]: 1,
+  [Status.Success]: 2,
+  [Status.Failure]: 2,
+  [Status.Error]: 2,
+  [Status.Stopped]: 2,
+  [Status.Skipped]: 2
 }
 
 const LEVEL_STATUSES_MAP = {
-  0: [Status.IDLE],
-  1: [Status.RUNNING, Status.STOPPING],
-  2: [Status.STOPPED, Status.FAILURE, Status.ERROR, Status.SUCCESS]
+  0: [Status.Idle],
+  1: [Status.Running, Status.Stopping],
+  2: [Status.Stopped, Status.Failure, Status.Error, Status.Success, Status.Skipped]
 }
 
 export default class BaseRunner<O extends Record<string, any>> extends EventEmitter {
@@ -39,7 +40,7 @@ export default class BaseRunner<O extends Record<string, any>> extends EventEmit
     return this.internalMeasurement
   }
 
-  protected internalStatus: Status = Status.IDLE
+  protected internalStatus: Status = Status.Idle
   protected internalError?: Error
   protected internalStartedAt: number
   protected internalEndedAt: number
@@ -58,21 +59,21 @@ export default class BaseRunner<O extends Record<string, any>> extends EventEmit
 
   public async run(): Promise<void> {
     switch (this.internalStatus) {
-      case Status.RUNNING:
+      case Status.Running:
         if (this.listenerCount('warning') > 0) {
           this.emit('warning', { message: 'Already running' })
         } else {
           throw new Error('Already running')
         }
         return
-      case Status.SKIPPED:
+      case Status.Skipped:
         if (this.listenerCount('warning') > 0) {
           this.emit('warning', { message: 'Already skipped' })
         } else {
           throw new Error('Already skipped')
         }
         return
-      case Status.IDLE:
+      case Status.Idle:
         break
       default:
         if (this.listenerCount('warning') > 0) {
@@ -88,7 +89,7 @@ export default class BaseRunner<O extends Record<string, any>> extends EventEmit
         () => {
           this.emit('timeout')
 
-          this.waitForStatus(Status.RUNNING).then(() => this.stop())
+          this.waitForStatus(Status.Running).then(() => this.stop())
         },
         typeof this.options.timeout === 'string' ? ms(this.options.timeout) : this.options.timeout
       )
@@ -101,7 +102,7 @@ export default class BaseRunner<O extends Record<string, any>> extends EventEmit
         await this.internalPrepare()
 
         await this.internalRun(() => {
-          this.internalStatus = Status.RUNNING
+          this.internalStatus = Status.Running
           this.timeMeasurer = startMeasurement()
           this.internalStartedAt = Date.now()
           onRunCalled = true
@@ -109,7 +110,7 @@ export default class BaseRunner<O extends Record<string, any>> extends EventEmit
           this.emit(this.internalStatus, { payload: { startedAt: this.startedAt } })
         })
       } catch (error) {
-        this.internalStatus = Status.ERROR
+        this.internalStatus = Status.Error
 
         throw error
       }
@@ -125,8 +126,8 @@ export default class BaseRunner<O extends Record<string, any>> extends EventEmit
       if (this.timeMeasurer) this.internalMeasurement = this.timeMeasurer.finish()
       this.internalEndedAt = Date.now()
 
-      if ([Status.SUCCESS, Status.RUNNING].includes(this.internalStatus)) {
-        if ([Status.RUNNING].includes(this.internalStatus)) this.internalStatus = Status.SUCCESS
+      if ([Status.Success, Status.Running].includes(this.internalStatus)) {
+        if ([Status.Running].includes(this.internalStatus)) this.internalStatus = Status.Success
 
         this.emit(this.internalStatus, { measurement: this.internalMeasurement })
         this.emit('end', { measurement: this.internalMeasurement, payload: { endedAt: this.endedAt } })
@@ -146,7 +147,7 @@ export default class BaseRunner<O extends Record<string, any>> extends EventEmit
       try {
         await this.internalRelease()
       } catch (error) {
-        this.internalStatus = Status.ERROR
+        this.internalStatus = Status.Error
 
         if (this.listenerCount('error') > 0) {
           this.emit('error', { error })
@@ -158,9 +159,9 @@ export default class BaseRunner<O extends Record<string, any>> extends EventEmit
   }
 
   public async stop(): Promise<void> {
-    if ([Status.IDLE].includes(this.internalStatus)) return
-    if ([Status.RUNNING].includes(this.internalStatus)) {
-      this.internalStatus = Status.STOPPING
+    if ([Status.Idle].includes(this.internalStatus)) return
+    if ([Status.Running].includes(this.internalStatus)) {
+      this.internalStatus = Status.Stopping
       this.emit(this.internalStatus)
 
       this.stopPromise = new Promise((resolve) => (this.stopPromiseSolver = resolve))
@@ -172,8 +173,8 @@ export default class BaseRunner<O extends Record<string, any>> extends EventEmit
   }
 
   public skip(reason?: string): void {
-    if ([Status.IDLE].includes(this.internalStatus)) {
-      this.internalStatus = Status.SKIPPED
+    if ([Status.Idle].includes(this.internalStatus)) {
+      this.internalStatus = Status.Skipped
       reason ? this.emit(this.internalStatus, { payload: { reason } }) : this.emit(this.internalStatus)
     }
   }
@@ -201,8 +202,8 @@ export default class BaseRunner<O extends Record<string, any>> extends EventEmit
   }
 
   protected handleFailure(): void {
-    if ([Status.STOPPING].includes(this.internalStatus)) {
-      this.internalStatus = Status.STOPPED
+    if ([Status.Stopping].includes(this.internalStatus)) {
+      this.internalStatus = Status.Stopped
       this.internalError = this.internalError || new Error('Stopped')
     }
 

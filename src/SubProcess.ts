@@ -88,7 +88,7 @@ export default class SubProcess extends BaseRunner<SubProcessOptions> {
       })
 
       this.engineProcess.on('success', () => {
-        this.internalStatus = Status.SUCCESS
+        this.internalStatus = Status.Success
         this.internalExitCode = 0
 
         this.engineProcess.removeAllListeners()
@@ -98,7 +98,7 @@ export default class SubProcess extends BaseRunner<SubProcessOptions> {
       })
 
       this.engineProcess.on('failure', (exitCode) => {
-        this.internalStatus = Status.FAILURE
+        this.internalStatus = Status.Failure
         this.internalExitCode = exitCode
         this.internalError = new Error(`Process exited with code ${exitCode}${this.stderrChunks.length > 0 ? `\n\n${this.stderr}` : ''}`)
 
@@ -109,7 +109,7 @@ export default class SubProcess extends BaseRunner<SubProcessOptions> {
       })
 
       this.engineProcess.on('killed', (signal) => {
-        this.internalStatus = Status.STOPPED
+        this.internalStatus = Status.Stopped
         this.internalSignal = signal
 
         this.engineProcess.removeAllListeners()

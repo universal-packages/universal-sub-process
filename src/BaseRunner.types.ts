@@ -1,12 +1,12 @@
 export enum Status {
-  IDLE = 'idle',
-  RUNNING = 'running',
-  SUCCESS = 'success',
-  ERROR = 'error',
-  FAILURE = 'failure',
-  STOPPING = 'stopping',
-  STOPPED = 'stopped',
-  SKIPPED = 'skipped'
+  Idle = 'idle',
+  Running = 'running',
+  Success = 'success',
+  Error = 'error',
+  Failure = 'failure',
+  Stopping = 'stopping',
+  Stopped = 'stopped',
+  Skipped = 'skipped'
 }
 
 export interface BaseRunnerOptions {
