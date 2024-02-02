@@ -1,6 +1,6 @@
 # Sub SubProcess
 
-[![npm version](https://badge.fury.io/js/@universal-packages%2Fprocesses.svg)](https://www.npmjs.com/package/@universal-packages/sub-process)
+[![npm version](https://badge.fury.io/js/@universal-packages%2Fsub-process.svg)](https://www.npmjs.com/package/@universal-packages/sub-process)
 [![Testing](https://github.com/universal-packages/universal-sub-process/actions/workflows/testing.yml/badge.svg)](https://github.com/universal-packages/universal-sub-process/actions/workflows/testing.yml)
 [![codecov](https://codecov.io/gh/universal-packages/universal-sub-process/branch/main/graph/badge.svg?token=CXPJSN8IGL)](https://codecov.io/gh/universal-packages/universal-sub-process)
 
