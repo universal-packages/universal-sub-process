@@ -27,21 +27,23 @@ export default class TestEngine implements EngineInterface {
 
   public static reset() {
     TestEngine.commandHistory.length = 0
-    TestEngine.mockEvents.length = 0
+    TestEngine.mockEvents = {}
   }
 
-  public static mockProcessEvents(events: MockEvent[]) {
-    TestEngine.mockEvents.push(events)
+  public static mockProcessEvents(command: string, events: MockEvent[]) {
+    if (!TestEngine.mockEvents[command]) TestEngine.mockEvents[command] = []
+    TestEngine.mockEvents[command].push(events)
   }
 
-  private static readonly mockEvents: MockEvent[][] = []
+  private static mockEvents: Record<string, MockEvent[][]> = {}
 
   run(command: string, args: string[], input: Readable, env: Record<string, string>, workingDirectory: string): TestEngineProcess {
     TestEngine.commandHistory.push({ command, args, input, env, workingDirectory, events: [] })
 
     let killWithSignal = null
 
-    const nextEvents = TestEngine.mockEvents.shift()
+    const commandEvents = TestEngine.mockEvents[command]
+    const nextEvents = commandEvents && commandEvents.shift()
 
     if (nextEvents) {
       const errorEvent = nextEvents.find((event): boolean => event.type === 'error')
