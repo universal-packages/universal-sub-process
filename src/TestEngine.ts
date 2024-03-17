@@ -20,6 +20,7 @@ interface MockEvent {
   code?: number
   signal?: NodeJS.Signals | number
   error?: Error
+  wait?: number
 }
 
 export default class TestEngine implements EngineInterface {
@@ -58,12 +59,14 @@ export default class TestEngine implements EngineInterface {
     const testProcess = new TestEngineProcess(++TEST_ID, { kill: (signal: NodeJS.Signals | number) => (killWithSignal = signal) })
 
     // Wait for tests to kill the process if they want to
-    setTimeout(() => {
+    setTimeout(async (): Promise<void> => {
       if (nextEvents) {
         for (let i = 0; i < nextEvents.length; i++) {
           const currentEvent = nextEvents[i]
 
           TestEngine.commandHistory[TestEngine.commandHistory.length - 1].events.push(currentEvent)
+
+          if (currentEvent.wait) await new Promise((resolve) => setTimeout(resolve, currentEvent.wait))
 
           switch (currentEvent.type) {
             case 'stdout':
