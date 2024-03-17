@@ -9,7 +9,7 @@ beforeEach((): void => {
 
 describe(SubProcess, (): void => {
   it('can be configured to wait before an event', async (): Promise<void> => {
-    const subProcess = new SubProcess({ command: 'echo', args: ['hello'] })
+    const subProcess = new SubProcess({ command: 'some command', args: ['hello'] })
     const listener = jest.fn()
 
     subProcess.on('*', listener)
@@ -17,11 +17,11 @@ describe(SubProcess, (): void => {
     const start = new Date().getTime()
 
     TestEngine.mockProcessEvents({
-      command: 'echo',
-      args: ['hello'],
+      command: 'some',
+      args: ['command', 'hello'],
       events: [
-        { type: 'stdout', data: 'Command stdout', wait: 1000 },
-        { type: 'stdout', data: 'Command stdout', wait: 1000 }
+        { type: 'stdout', data: 'Command stdout', wait: 500 },
+        { type: 'stdout', data: 'Command stdout', wait: 500 }
       ]
     })
 
@@ -29,6 +29,37 @@ describe(SubProcess, (): void => {
 
     const end = new Date().getTime()
 
-    expect(end - start).toBeGreaterThanOrEqual(2000)
+    expect(end - start).toBeGreaterThanOrEqual(1000)
+  })
+
+  it('imitates echo command without being configured', async (): Promise<void> => {
+    const subProcess = new SubProcess({ command: 'echo', args: ['hello'] })
+    const listener = jest.fn()
+
+    subProcess.on('*', listener)
+
+    await subProcess.run()
+
+    expect(listener.mock.calls).toEqual([
+      [{ event: 'running', payload: { startedAt: expect.any(Date) } }],
+      [{ event: 'stdout', payload: { data: 'hello' } }],
+      [{ event: 'success', measurement: expect.any(Measurement) }],
+      [{ event: 'end', measurement: expect.any(Measurement), payload: { endedAt: expect.any(Date) } }]
+    ])
+  })
+
+  it('imitates sleep command without being configured (100x faster)', async (): Promise<void> => {
+    const subProcess = new SubProcess({ command: 'sleep', args: ['100000'] })
+    const listener = jest.fn()
+
+    subProcess.on('*', listener)
+
+    const start = new Date().getTime()
+
+    await subProcess.run()
+
+    const end = new Date().getTime()
+
+    expect(end - start).toBeGreaterThanOrEqual(1000)
   })
 })

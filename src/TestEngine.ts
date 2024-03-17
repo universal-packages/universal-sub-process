@@ -59,7 +59,7 @@ export default class TestEngine implements EngineInterface {
 
     let killWithSignal = null
 
-    const mockKey = command + ' ' + args.join('') + ' ' + JSON.stringify(env) + (workingDirectory ? ' ' + workingDirectory : '')
+    const mockKey = command + ' ' + args.join(' ') + ' ' + JSON.stringify(env) + (workingDirectory ? ' ' + workingDirectory : '')
     const commandEvents = TestEngine.mockEvents[mockKey]
     const nextEvents = commandEvents && commandEvents.shift()
 
@@ -120,6 +120,15 @@ export default class TestEngine implements EngineInterface {
           testProcess.emit('success')
         }
       } else {
+        switch (command) {
+          case 'sleep':
+            await new Promise((resolve) => setTimeout(resolve, parseInt(args[0], 10) / 100))
+            break
+          case 'echo':
+            testProcess.emit('stdout', Buffer.from(args.join(' ').replace(/\'$/, '').replace(/^\'/, '').replace(/\"$/, '').replace(/^\"/, '')))
+            break
+        }
+
         if (killWithSignal) {
           testProcess.emit('killed', killWithSignal)
         } else {
