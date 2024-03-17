@@ -16,10 +16,14 @@ describe(SubProcess, (): void => {
 
     const start = new Date().getTime()
 
-    TestEngine.mockProcessEvents('echo', [
-      { type: 'stdout', data: 'Command stdout', wait: 1000 },
-      { type: 'stdout', data: 'Command stdout', wait: 1000 }
-    ])
+    TestEngine.mockProcessEvents({
+      command: 'echo',
+      args: ['hello'],
+      events: [
+        { type: 'stdout', data: 'Command stdout', wait: 1000 },
+        { type: 'stdout', data: 'Command stdout', wait: 1000 }
+      ]
+    })
 
     await subProcess.run()
 

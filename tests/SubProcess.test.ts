@@ -14,10 +14,14 @@ describe(SubProcess, (): void => {
 
     subProcess.on('*', listener)
 
-    TestEngine.mockProcessEvents('echo', [
-      { type: 'stdout', data: 'Command stdout' },
-      { type: 'stdout', data: 'Command stdout' }
-    ])
+    TestEngine.mockProcessEvents({
+      command: 'echo',
+      args: ['hello'],
+      events: [
+        { type: 'stdout', data: 'Command stdout' },
+        { type: 'stdout', data: 'Command stdout' }
+      ]
+    })
 
     await subProcess.run()
 
@@ -60,10 +64,14 @@ describe(SubProcess, (): void => {
 
     subProcess.on('*', listener)
 
-    TestEngine.mockProcessEvents('failure', [
-      { type: 'stderr', data: 'Command failure' },
-      { type: 'exit', code: 1 }
-    ])
+    TestEngine.mockProcessEvents({
+      command: 'failure',
+      args: ['any'],
+      events: [
+        { type: 'stderr', data: 'Command failure' },
+        { type: 'exit', code: 1 }
+      ]
+    })
 
     await subProcess.run()
 
@@ -99,7 +107,11 @@ describe(SubProcess, (): void => {
     const subProcess = new SubProcess({ command: 'error', args: ['any'] })
     let error: Error
 
-    TestEngine.mockProcessEvents('error', [{ type: 'error', error: new Error('Command error') }])
+    TestEngine.mockProcessEvents({
+      command: 'error',
+      args: ['any'],
+      events: [{ type: 'error', error: new Error('Command error') }]
+    })
 
     try {
       await subProcess.run()
@@ -133,10 +145,14 @@ describe(SubProcess, (): void => {
 
     subProcess.on('*', listener)
 
-    TestEngine.mockProcessEvents('sleep', [
-      { type: 'stdout', data: 'Command stdout' },
-      { type: 'stdout', data: 'Command stdout' }
-    ])
+    TestEngine.mockProcessEvents({
+      command: 'sleep',
+      args: ['any'],
+      events: [
+        { type: 'stdout', data: 'Command stdout' },
+        { type: 'stdout', data: 'Command stdout' }
+      ]
+    })
 
     subProcess.run()
 
@@ -176,10 +192,14 @@ describe(SubProcess, (): void => {
 
     subProcess.on('*', listener)
 
-    TestEngine.mockProcessEvents('sleep', [
-      { type: 'stdout', data: 'Command stdout' },
-      { type: 'stdout', data: 'Command stdout' }
-    ])
+    TestEngine.mockProcessEvents({
+      command: 'sleep',
+      args: ['any'],
+      events: [
+        { type: 'stdout', data: 'Command stdout' },
+        { type: 'stdout', data: 'Command stdout' }
+      ]
+    })
 
     subProcess.run()
 
@@ -240,10 +260,14 @@ describe(SubProcess, (): void => {
 
     subProcess.on('*', listener)
 
-    TestEngine.mockProcessEvents('sleep', [
-      { type: 'stdout', data: 'Command stdout' },
-      { type: 'stdout', data: 'Command stdout' }
-    ])
+    TestEngine.mockProcessEvents({
+      command: 'sleep',
+      args: ['any'],
+      events: [
+        { type: 'stdout', data: 'Command stdout' },
+        { type: 'stdout', data: 'Command stdout' }
+      ]
+    })
 
     await subProcess.run()
 

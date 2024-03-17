@@ -23,6 +23,14 @@ interface MockEvent {
   wait?: number
 }
 
+interface ProcessMockDescriptor {
+  command: string
+  args?: string[]
+  env?: Record<string, string>
+  workingDirectory?: string
+  events: MockEvent[]
+}
+
 export default class TestEngine implements EngineInterface {
   public static readonly commandHistory: HistoryEntry[] = []
 
@@ -31,9 +39,17 @@ export default class TestEngine implements EngineInterface {
     TestEngine.mockEvents = {}
   }
 
-  public static mockProcessEvents(command: string, events: MockEvent[]) {
-    if (!TestEngine.mockEvents[command]) TestEngine.mockEvents[command] = []
-    TestEngine.mockEvents[command].push(events)
+  public static mockProcessEvents(descriptor: ProcessMockDescriptor) {
+    const mockKey =
+      descriptor.command +
+      ' ' +
+      (descriptor.args ? descriptor.args.join(' ') : '') +
+      ' ' +
+      (descriptor.env ? JSON.stringify(descriptor.env) : JSON.stringify({})) +
+      (descriptor.workingDirectory ? ' ' + descriptor.workingDirectory : '')
+
+    if (!TestEngine.mockEvents[mockKey]) TestEngine.mockEvents[mockKey] = []
+    TestEngine.mockEvents[mockKey].push(descriptor.events)
   }
 
   private static mockEvents: Record<string, MockEvent[][]> = {}
@@ -43,7 +59,8 @@ export default class TestEngine implements EngineInterface {
 
     let killWithSignal = null
 
-    const commandEvents = TestEngine.mockEvents[command]
+    const mockKey = command + ' ' + args.join('') + ' ' + JSON.stringify(env) + (workingDirectory ? ' ' + workingDirectory : '')
+    const commandEvents = TestEngine.mockEvents[mockKey]
     const nextEvents = commandEvents && commandEvents.shift()
 
     if (nextEvents) {
