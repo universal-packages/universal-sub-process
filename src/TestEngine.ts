@@ -127,6 +127,15 @@ export default class TestEngine implements EngineInterface {
           case 'echo':
             testProcess.emit('stdout', Buffer.from(args.join(' ').replace(/\'$/, '').replace(/^\'/, '').replace(/\"$/, '').replace(/^\"/, '')))
             break
+          case 'failure':
+            testProcess.emit('stderr', Buffer.from(args[0] || 'Command failed'))
+
+            if (killWithSignal) {
+              testProcess.emit('killed', killWithSignal)
+            } else {
+              testProcess.emit('failure', 1)
+            }
+            return
         }
 
         if (killWithSignal) {

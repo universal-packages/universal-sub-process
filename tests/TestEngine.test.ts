@@ -62,4 +62,20 @@ describe(SubProcess, (): void => {
 
     expect(end - start).toBeGreaterThanOrEqual(1000)
   })
+
+  it('has a failure command perk', async (): Promise<void> => {
+    const subProcess = new SubProcess({ command: 'failure', args: ['My message'] })
+    const listener = jest.fn()
+
+    subProcess.on('*', listener)
+
+    await subProcess.run()
+
+    expect(listener.mock.calls).toEqual([
+      [{ event: 'running', payload: { startedAt: expect.any(Date) } }],
+      [{ event: 'stderr', payload: { data: 'My message' } }],
+      [{ event: 'failure', error: new Error('Process exited with code 1\n\nMy message'), measurement: expect.any(Measurement) }],
+      [{ event: 'end', error: new Error('Process exited with code 1\n\nMy message'), measurement: expect.any(Measurement), payload: { endedAt: expect.any(Date) } }]
+    ])
+  })
 })
