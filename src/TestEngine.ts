@@ -125,7 +125,7 @@ export default class TestEngine implements EngineInterface {
             await new Promise((resolve) => setTimeout(resolve, parseInt(args[0], 10) / 100))
             break
           case 'echo':
-            testProcess.emit('stdout', Buffer.from(args.join(' ').replace(/\'$/, '').replace(/^\'/, '').replace(/\"$/, '').replace(/^\"/, '')))
+            testProcess.emit('stdout', Buffer.from(args.join(' ').replace(/\'$/, '').replace(/^\'/, '').replace(/\"$/, '').replace(/^\"/, '') + '\n'))
             break
           case 'failure':
             testProcess.emit('stderr', Buffer.from(args[0] || 'Command failed'))

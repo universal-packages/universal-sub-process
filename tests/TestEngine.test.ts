@@ -42,7 +42,7 @@ describe(SubProcess, (): void => {
 
     expect(listener.mock.calls).toEqual([
       [{ event: 'running', payload: { startedAt: expect.any(Date) } }],
-      [{ event: 'stdout', payload: { data: 'hello' } }],
+      [{ event: 'stdout', payload: { data: 'hello\n' } }],
       [{ event: 'success', measurement: expect.any(Measurement) }],
       [{ event: 'end', measurement: expect.any(Measurement), payload: { endedAt: expect.any(Date) } }]
     ])
