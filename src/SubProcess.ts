@@ -1,5 +1,4 @@
 import { resolveAdapter } from '@universal-packages/adapter-resolver'
-import { checkDirectory } from '@universal-packages/fs-utils'
 import { Readable } from 'stream'
 
 import BaseRunner from './BaseRunner'
@@ -67,7 +66,7 @@ export default class SubProcess extends BaseRunner<SubProcessOptions> {
   }
 
   protected async internalRun(onRunning: () => void): Promise<void> {
-    const finalWorkingDirectory = this.options.workingDirectory ? checkDirectory(this.options.workingDirectory) : undefined
+    const finalWorkingDirectory = this.options.workingDirectory ? this.options.workingDirectory : undefined
 
     this.engineProcess = await this.engine.run(this.command, this.args, this.input, this.env, finalWorkingDirectory)
     this.internalProcessId = this.engineProcess.processId
