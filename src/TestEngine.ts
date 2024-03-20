@@ -1,3 +1,4 @@
+import path from 'path'
 import { Readable } from 'stream'
 
 import { EngineInterface } from './SubProcess.types'
@@ -46,7 +47,7 @@ export default class TestEngine implements EngineInterface {
       (descriptor.args ? descriptor.args.join(' ') : '') +
       ' ' +
       (descriptor.env ? JSON.stringify(descriptor.env) : JSON.stringify({})) +
-      (descriptor.workingDirectory ? ' ' + descriptor.workingDirectory : '')
+      (descriptor.workingDirectory ? ' ' + path.resolve(descriptor.workingDirectory) : '')
 
     if (!TestEngine.mockEvents[mockKey]) TestEngine.mockEvents[mockKey] = []
     TestEngine.mockEvents[mockKey].push(descriptor.events)
