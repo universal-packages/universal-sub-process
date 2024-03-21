@@ -14,7 +14,7 @@ export default class SpawnEngine extends BaseChildProcessEngine {
 
   protected createChildProcess(command: string, args: string[] = [], env: Record<string, string> = {}, workingDirectory?: string): ChildProcess {
     const sourcedCommand = this.prependShellSourceScript(command, this.options.shell)
-    const finalEnv = { ...this.options.env, ...env }
+    const finalEnv = { ...process.env, ...this.options.env, ...env }
 
     return spawn(sourcedCommand, args, { ...this.options, env: finalEnv, cwd: workingDirectory })
   }

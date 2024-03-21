@@ -15,7 +15,7 @@ export default class ExecEngine extends BaseChildProcessEngine {
   protected createChildProcess(command: string, args: string[] = [], env: Record<string, string> = {}, workingDirectory?: string): ChildProcess {
     const commandToRun = `${command} ${args.join(' ')}`.trim()
     const sourcedCommand = this.prependShellSourceScript(commandToRun, this.options.shell)
-    const finalEnv = { ...this.options.env, ...env }
+    const finalEnv = { ...process.env, ...this.options.env, ...env }
 
     return exec(sourcedCommand, { ...this.options, env: finalEnv, cwd: workingDirectory }, (error) => {
       if (error) this.error = error
