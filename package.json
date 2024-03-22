@@ -1,6 +1,6 @@
 {
   "name": "@universal-packages/sub-process",
-  "version": "1.15.2",
+  "version": "1.15.3",
   "description": "Process encapsulation for different exec technics",
   "author": "David De Anda <david@universal-packages.com> (https://github.com/universal-packages)",
   "license": "MIT",
