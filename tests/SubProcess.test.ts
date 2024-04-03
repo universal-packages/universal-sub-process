@@ -254,8 +254,67 @@ describe(SubProcess, (): void => {
     expect(TestEngine.commandHistory).toEqual([])
   })
 
+  it('is prepared for when a process is skipped and listeners are not in place', async (): Promise<void> => {
+    const subProcess = new SubProcess({ command: 'sleep', args: ['any'] })
+    let error: Error
+
+    subProcess.skip()
+
+    try {
+      await subProcess.run()
+    } catch (err) {
+      error = err
+    }
+
+    expect(error.message).toEqual('Already skipped')
+  })
+
   it('timeouts a process', async (): Promise<void> => {
     const subProcess = new SubProcess({ command: 'sleep', args: ['any'], timeout: 2 })
+    const listener = jest.fn()
+
+    subProcess.on('*', listener)
+
+    TestEngine.mockProcessEvents({
+      command: 'sleep',
+      args: ['any'],
+      events: [
+        { type: 'stdout', data: 'Command stdout' },
+        { type: 'stdout', data: 'Command stdout' }
+      ]
+    })
+
+    await subProcess.run()
+
+    expect(subProcess.status).toEqual(Status.Stopped)
+    expect(subProcess.signal).toEqual('SIGTERM')
+    expect(subProcess.exitCode).toBeUndefined()
+    expect(subProcess.stdout).toEqual('Command stdout')
+    expect(subProcess.stderr).toEqual('')
+
+    expect(listener.mock.calls).toEqual([
+      [{ event: 'running', payload: { startedAt: expect.any(Date) } }],
+      [{ event: 'timeout' }],
+      [{ event: 'stopping' }],
+      [{ event: 'stdout', payload: { data: 'Command stdout' } }],
+      [{ event: 'stopped', measurement: expect.any(Measurement) }],
+      [{ event: 'end', measurement: expect.any(Measurement), payload: { endedAt: expect.any(Date) } }]
+    ])
+
+    expect(TestEngine.commandHistory).toEqual([
+      {
+        command: 'sleep',
+        args: ['any'],
+        input: expect.any(Readable),
+        env: {},
+        workingDirectory: undefined,
+        events: [{ type: 'stdout', data: 'Command stdout' }]
+      }
+    ])
+  })
+
+  it('timeouts a process using string times', async (): Promise<void> => {
+    const subProcess = new SubProcess({ command: 'sleep', args: ['any'], timeout: '10ms' })
     const listener = jest.fn()
 
     subProcess.on('*', listener)

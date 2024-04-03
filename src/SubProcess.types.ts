@@ -9,7 +9,7 @@ export interface SubProcessOptions {
   engineOptions?: Record<string, any>
   env?: Record<string, string>
   input?: string | Buffer | string[] | Buffer[] | Readable
-  timeout?: number
+  timeout?: number | string
   workingDirectory?: string
 }
 

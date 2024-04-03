@@ -47,7 +47,7 @@ export default class BaseChildProcessEngine implements EngineInterface {
   }
 
   protected createChildProcess(_command: string, _args?: string[], _env?: Record<string, string>, _workingDirectory?: string): ChildProcess {
-    throw new Error('Not implemented')
+    throw new Error('Method createChildProcess not implemented.')
   }
 
   protected prependShellSourceScript(script: string, shell: string | boolean): string {

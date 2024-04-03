@@ -109,10 +109,14 @@ export default class BaseRunner<O extends Record<string, any>> extends EventEmit
 
           this.emit(this.internalStatus, { payload: { startedAt: this.startedAt } })
         })
+
+        await this.internalRelease()
       } catch (error) {
         this.internalStatus = Status.Error
 
         throw error
+      } finally {
+        clearTimeout(this.timeout)
       }
 
       if (!onRunCalled) {
@@ -120,8 +124,6 @@ export default class BaseRunner<O extends Record<string, any>> extends EventEmit
           message: 'InternalRun never called onRun argument, this runner is not able to communicate when it starts running nor able to measure started time and running time.'
         })
       }
-
-      clearTimeout(this.timeout)
 
       if (this.timeMeasurer) this.internalMeasurement = this.timeMeasurer.finish()
       this.internalEndedAt = Date.now()
@@ -131,7 +133,6 @@ export default class BaseRunner<O extends Record<string, any>> extends EventEmit
 
         this.emit(this.internalStatus, { measurement: this.internalMeasurement })
         this.emit('end', { measurement: this.internalMeasurement, payload: { endedAt: this.endedAt } })
-        if (this.stopPromiseSolver) this.stopPromiseSolver()
       } else {
         this.handleFailure()
       }
@@ -140,20 +141,6 @@ export default class BaseRunner<O extends Record<string, any>> extends EventEmit
         this.emit('error', { error })
       } else {
         throw error
-      }
-    } finally {
-      clearTimeout(this.timeout)
-
-      try {
-        await this.internalRelease()
-      } catch (error) {
-        this.internalStatus = Status.Error
-
-        if (this.listenerCount('error') > 0) {
-          this.emit('error', { error })
-        } else {
-          throw error
-        }
       }
     }
   }
@@ -166,7 +153,12 @@ export default class BaseRunner<O extends Record<string, any>> extends EventEmit
 
       this.stopPromise = new Promise((resolve) => (this.stopPromiseSolver = resolve))
 
-      this.internalStop()
+      try {
+        await this.internalStop()
+      } catch (error) {
+        this.internalStatus = Status.Error
+        this.internalError = error
+      }
     }
 
     await this.stopPromise
@@ -186,11 +178,11 @@ export default class BaseRunner<O extends Record<string, any>> extends EventEmit
   }
 
   protected async internalRun(_onRunning: () => void): Promise<void> {
-    throw new Error('Not implemented')
+    throw new Error('Method internalRun not implemented')
   }
 
   protected async internalStop(): Promise<void> {
-    throw new Error('Not implemented')
+    throw new Error('Method internalStop not implemented')
   }
 
   protected async internalPrepare(): Promise<void> {
@@ -213,7 +205,7 @@ export default class BaseRunner<O extends Record<string, any>> extends EventEmit
       if (this.stopPromiseSolver) this.stopPromiseSolver()
     } else {
       if (this.stopPromiseSolver) this.stopPromiseSolver()
-      throw this.internalError
+      throw this.internalError || new Error('Unknown error')
     }
   }
 }
