@@ -170,8 +170,8 @@ describe(SubProcess, (): void => {
       [{ event: 'running', payload: { startedAt: expect.any(Date) } }],
       [{ event: 'stopping' }],
       [{ event: 'stdout', payload: { data: 'Command stdout' } }],
-      [{ event: 'stopped', measurement: expect.any(Measurement) }],
-      [{ event: 'end', measurement: expect.any(Measurement), payload: { endedAt: expect.any(Date) } }]
+      [{ event: 'stopped', error: new Error('Process killed with signal SIGTERM'), measurement: expect.any(Measurement) }],
+      [{ event: 'end', error: new Error('Process killed with signal SIGTERM'), measurement: expect.any(Measurement), payload: { endedAt: expect.any(Date) } }]
     ])
 
     expect(TestEngine.commandHistory).toEqual([
@@ -217,8 +217,8 @@ describe(SubProcess, (): void => {
       [{ event: 'running', payload: { startedAt: expect.any(Date) } }],
       [{ event: 'stopping' }],
       [{ event: 'stdout', payload: { data: 'Command stdout' } }],
-      [{ event: 'stopped', measurement: expect.any(Measurement) }],
-      [{ event: 'end', measurement: expect.any(Measurement), payload: { endedAt: expect.any(Date) } }]
+      [{ event: 'stopped', error: new Error('Process killed with signal SIGKILL'), measurement: expect.any(Measurement) }],
+      [{ event: 'end', error: new Error('Process killed with signal SIGKILL'), measurement: expect.any(Measurement), payload: { endedAt: expect.any(Date) } }]
     ])
 
     expect(TestEngine.commandHistory).toEqual([
@@ -297,8 +297,8 @@ describe(SubProcess, (): void => {
       [{ event: 'timeout' }],
       [{ event: 'stopping' }],
       [{ event: 'stdout', payload: { data: 'Command stdout' } }],
-      [{ event: 'stopped', measurement: expect.any(Measurement) }],
-      [{ event: 'end', measurement: expect.any(Measurement), payload: { endedAt: expect.any(Date) } }]
+      [{ event: 'stopped', error: new Error('Process killed with signal SIGTERM'), measurement: expect.any(Measurement) }],
+      [{ event: 'end', error: new Error('Process killed with signal SIGTERM'), measurement: expect.any(Measurement), payload: { endedAt: expect.any(Date) } }]
     ])
 
     expect(TestEngine.commandHistory).toEqual([
@@ -341,8 +341,8 @@ describe(SubProcess, (): void => {
       [{ event: 'timeout' }],
       [{ event: 'stopping' }],
       [{ event: 'stdout', payload: { data: 'Command stdout' } }],
-      [{ event: 'stopped', measurement: expect.any(Measurement) }],
-      [{ event: 'end', measurement: expect.any(Measurement), payload: { endedAt: expect.any(Date) } }]
+      [{ event: 'stopped', error: new Error('Process killed with signal SIGTERM'), measurement: expect.any(Measurement) }],
+      [{ event: 'end', error: new Error('Process killed with signal SIGTERM'), measurement: expect.any(Measurement), payload: { endedAt: expect.any(Date) } }]
     ])
 
     expect(TestEngine.commandHistory).toEqual([

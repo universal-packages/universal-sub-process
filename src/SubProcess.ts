@@ -110,6 +110,7 @@ export default class SubProcess extends BaseRunner<SubProcessOptions> {
       this.engineProcess.on('killed', (signal) => {
         this.internalStatus = Status.Stopped
         this.internalSignal = signal
+        this.internalError = new Error(`Process killed with signal ${signal}`)
 
         this.engineProcess.removeAllListeners()
         this.engineProcess = null

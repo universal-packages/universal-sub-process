@@ -107,8 +107,8 @@ tsconfig.json\n`)
     expect(listener.mock.calls).toEqual([
       [{ event: 'running', payload: { startedAt: expect.any(Date) } }],
       [{ event: 'stopping' }],
-      [{ event: 'stopped', measurement: expect.any(Measurement) }],
-      [{ event: 'end', measurement: expect.any(Measurement), payload: { endedAt: expect.any(Date) } }]
+      [{ event: 'stopped', error: new Error('Process killed with signal SIGTERM'), measurement: expect.any(Measurement) }],
+      [{ event: 'end', error: new Error('Process killed with signal SIGTERM'), measurement: expect.any(Measurement), payload: { endedAt: expect.any(Date) } }]
     ])
   })
 
