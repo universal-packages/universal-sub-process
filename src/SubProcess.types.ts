@@ -7,7 +7,7 @@ export interface SubProcessOptions {
   command: string
   engine?: EngineInterface | string
   engineOptions?: Record<string, any>
-  env?: Record<string, string>
+  env?: Record<string, string | number>
   input?: string | Buffer | string[] | Buffer[] | Readable
   timeout?: number | string
   workingDirectory?: string
@@ -16,7 +16,7 @@ export interface SubProcessOptions {
 export interface EngineInterface {
   prepare?: () => void | Promise<void>
   release?: () => void | Promise<void>
-  run: (command: string, args: string[], input: Readable, env: Record<string, string>, workingDirectory: string) => EngineProcess | Promise<EngineProcess>
+  run: (command: string, args: string[], input: Readable, env: Record<string, string | number>, workingDirectory: string) => EngineProcess | Promise<EngineProcess>
 }
 
 export interface EngineInterfaceClass {

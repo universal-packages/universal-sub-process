@@ -36,7 +36,7 @@ export default class SubProcess extends BaseRunner<SubProcessOptions> {
   private readonly input: Readable
   private readonly command: string
   private readonly args: string[]
-  private readonly env: Record<string, string>
+  private readonly env: Record<string, string | number>
 
   private readonly stdoutChunks: Buffer[] = []
   private readonly stderrChunks: Buffer[] = []
