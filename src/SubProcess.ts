@@ -12,11 +12,11 @@ import TestEngine from './TestEngine'
 
 export default class SubProcess extends BaseRunner<SubProcessOptions> {
   public get stdout(): string {
-    return Buffer.concat(this.stdoutChunks).toString()
+    return Buffer.concat(this.stdoutChunks.map((chunk) => new Uint8Array(chunk))).toString()
   }
 
   public get stderr(): string {
-    return Buffer.concat(this.stderrChunks).toString()
+    return Buffer.concat(this.stderrChunks.map((chunk) => new Uint8Array(chunk))).toString()
   }
 
   public get exitCode(): number {
