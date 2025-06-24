@@ -10,7 +10,7 @@ interface HistoryEntry {
   args: string[]
   input: string | Buffer | string[] | Buffer[] | Readable
   env: Record<string, string>
-  workingDirectory: string
+  workingDirectory?: string
   events?: MockEvent[]
 }
 
@@ -54,10 +54,10 @@ export default class TestEngine implements EngineInterface {
 
   private static mockEvents: Record<string, MockEvent[][]> = {}
 
-  run(command: string, args: string[], input: Readable, env: Record<string, string>, workingDirectory: string): TestEngineProcess {
+  run(command: string, args: string[], input: Readable, env: Record<string, string>, workingDirectory?: string): TestEngineProcess {
     TestEngine.commandHistory.push({ command, args, input, env, workingDirectory, events: [] })
 
-    let killWithSignal = null
+    let killWithSignal: NodeJS.Signals | number | null = null
 
     const mockKey = command + ' ' + args.join(' ') + ' ' + JSON.stringify(env) + (workingDirectory ? ' ' + workingDirectory : '')
     const commandEvents = TestEngine.mockEvents[mockKey]
@@ -67,7 +67,7 @@ export default class TestEngine implements EngineInterface {
       const errorEvent = nextEvents.find((event): boolean => event.type === 'error')
 
       if (errorEvent) {
-        TestEngine.commandHistory[TestEngine.commandHistory.length - 1].events.push(errorEvent)
+        TestEngine.commandHistory[TestEngine.commandHistory.length - 1].events?.push(errorEvent)
 
         throw errorEvent.error
       }
@@ -81,13 +81,13 @@ export default class TestEngine implements EngineInterface {
         for (let i = 0; i < nextEvents.length; i++) {
           const currentEvent = nextEvents[i]
 
-          TestEngine.commandHistory[TestEngine.commandHistory.length - 1].events.push(currentEvent)
+          TestEngine.commandHistory[TestEngine.commandHistory.length - 1].events?.push(currentEvent)
 
           if (currentEvent.wait) await new Promise((resolve) => setTimeout(resolve, currentEvent.wait))
 
           switch (currentEvent.type) {
             case 'stdout':
-              testProcess.emit('stdout', Buffer.from(currentEvent.data))
+              testProcess.emit('stdout', Buffer.from(currentEvent.data || ''))
 
               if (killWithSignal) {
                 testProcess.emit('killed', killWithSignal)
@@ -95,7 +95,7 @@ export default class TestEngine implements EngineInterface {
               }
               break
             case 'stderr':
-              testProcess.emit('stderr', Buffer.from(currentEvent.data))
+              testProcess.emit('stderr', Buffer.from(currentEvent.data || ''))
 
               if (killWithSignal) {
                 testProcess.emit('killed', killWithSignal)
@@ -112,12 +112,6 @@ export default class TestEngine implements EngineInterface {
               }
               return
           }
-        }
-
-        if (killWithSignal) {
-          testProcess.emit('killed', killWithSignal)
-        } else {
-          testProcess.emit('success')
         }
       } else {
         switch (command) {

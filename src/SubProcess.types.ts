@@ -1,24 +1,30 @@
+import { BaseRunnerEventMap, BaseRunnerOptions } from '@universal-packages/base-runner'
 import { Readable } from 'stream'
 
 import EngineProcess from './EngineProcess'
 
-export interface SubProcessOptions {
+export interface SubProcessOptions extends BaseRunnerOptions {
   args?: string[]
   command: string
+  captureStreams?: boolean
   engine?: EngineInterface | string
   engineOptions?: Record<string, any>
-  env?: Record<string, string | number>
+  env?: Record<string, string>
   input?: string | Buffer | string[] | Buffer[] | Readable
-  timeout?: number | string
   workingDirectory?: string
 }
 
 export interface EngineInterface {
   prepare?: () => void | Promise<void>
   release?: () => void | Promise<void>
-  run: (command: string, args: string[], input: Readable, env: Record<string, string | number>, workingDirectory: string) => EngineProcess | Promise<EngineProcess>
+  run: (command: string, args: string[], input: Readable, env: Record<string, string>, workingDirectory?: string) => EngineProcess | Promise<EngineProcess>
 }
 
 export interface EngineInterfaceClass {
-  new (options?: Record<string, any>): EngineInterface
+  new (options?: any): EngineInterface
+}
+
+export interface SubProcessEventMap extends BaseRunnerEventMap {
+  stdout: { data: string }
+  stderr: { data: string }
 }

@@ -1,5 +1,3 @@
-export { default as BaseRunner } from './BaseRunner'
-export * from './BaseRunner.types'
 export { default as SubProcess } from './SubProcess'
 export * from './SubProcess.types'
 export { default as ExecEngine } from './ExecEngine'

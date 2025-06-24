@@ -1,10 +1,10 @@
-# Sub SubProcess
+# Sub Process
 
 [![npm version](https://badge.fury.io/js/@universal-packages%2Fsub-process.svg)](https://www.npmjs.com/package/@universal-packages/sub-process)
 [![Testing](https://github.com/universal-packages/universal-sub-process/actions/workflows/testing.yml/badge.svg)](https://github.com/universal-packages/universal-sub-process/actions/workflows/testing.yml)
 [![codecov](https://codecov.io/gh/universal-packages/universal-sub-process/branch/main/graph/badge.svg?token=CXPJSN8IGL)](https://codecov.io/gh/universal-packages/universal-sub-process)
 
-Sub process encapsulation for different exec technics.
+Sub process encapsulation for different exec techniques.
 
 ## Install
 
@@ -12,154 +12,200 @@ Sub process encapsulation for different exec technics.
 npm install @universal-packages/sub-process
 ```
 
-## SubProcess
+# Usage
 
-SubProcess is the main interface to setup a process to run at whenever time and only once.
+## SubProcess `class`
 
-```js
+The `SubProcess` class extends [BaseRunner](https://github.com/universal-packages/universal-base-runner) to provide a unified API for executing system processes with different engines. It handles process lifecycle, stream capture, and provides event-driven monitoring.
+
+```ts
 import { SubProcess } from '@universal-packages/sub-process'
 
-const subProcess = new SubProcess({ command: 'echo', args: ['$VARIABLE'], env: { VARIABLE: 'value' } })
+const subProcess = new SubProcess({
+  command: 'echo "Hello World"',
+  args: ['--verbose'],
+  env: { NODE_ENV: 'production' },
+  captureStreams: true
+})
 
 await subProcess.run()
 
-console.log(subProcess.stdout.toString())
+console.log(subProcess.stdout) // "Hello World"
+console.log(subProcess.exitCode) // 0
 ```
 
-### Options
+### Constructor <small><small>`constructor`</small></small>
 
-- **`args`** `string[]`
-  Arguments to pass to the command.
-- **`command`** `string`
-  Command to run.
-- **`engine`** `Engine | 'spawn' | 'exec' | 'fork' | 'test'` `default: spawn`
+```ts
+new SubProcess(options: SubProcessOptions)
+```
+
+#### SubProcessOptions
+
+Extends [BaseRunnerOptions](https://github.com/universal-packages/universal-base-runner?tab=readme-ov-file#baserunneroptions) with the following additional options:
+
+- **`command`** `string` **required**
+  Command to run. Can include arguments as part of the command string.
+
+- **`args`** `string[]` (optional)
+  Additional arguments to pass to the command. These will be appended to any arguments already present in the command string.
+
+- **`captureStreams`** `boolean` (default: `false`)
+  Whether to capture stdout and stderr streams. When enabled, the output will be available through the `stdout` and `stderr` properties.
+
+- **`engine`** `EngineInterface | 'spawn' | 'exec' | 'fork' | 'test'` (default: `'spawn'`)
   Instance of the engine to be used to execute the process or a string identifying the engine adapter.
-- **`engineOptions`** `Object`
+
+  - **`'spawn'`**: Uses Node.js child_process.spawn (default)
+  - **`'exec'`**: Uses Node.js child_process.exec
+  - **`'fork'`**: Uses Node.js child_process.fork
+  - **`'test'`**: Uses a test engine for unit testing
+
+- **`engineOptions`** `Record<string, any>` (optional)
   Options to pass to the engine if resolved as adapter.
-- **`env`** `Object`
-  Environment variables to pass to the process.
-- **`input`** `string | Buffer | string[] | Buffer[] | Readable`
-  Input to pass to the process. For example when a process requires any kind of input like a yes/no question.
-- **`timeout`** `number`
-  Time to wait in milliseconds before killing the process.
-- **`workingDirectory`** `string`
-  Working directory to run the process in.
 
-### Instance methods
+- **`env`** `Record<string, string>` (optional)
+  Environment variables to pass to the process. These will be merged with the current process environment.
 
-#### **`prepare()`** **`async`**
+- **`input`** `string | Buffer | string[] | Buffer[] | Readable` (optional)
+  Input to pass to the process stdin. Useful when a process requires user input like yes/no questions or configuration input.
 
-Initialize the internal engine in case it needs preparation.
+- **`workingDirectory`** `string` (optional)
+  Working directory to run the process in. Defaults to the current working directory.
 
-#### **`release()`** **`async`**
+### Instance Methods
 
-Releases the engine resources in case they need to be disposed after finishing the process.
+In addition to [BaseRunner methods](https://github.com/universal-packages/universal-base-runner?tab=readme-ov-file#instance-methods), SubProcess provides:
 
-#### **`run()`** **`async`**
+#### **`kill(signal?: NodeJS.Signals | number)`** **`async`**
 
-Runs the process and waits for it to finish.
+Kills the process if it is running. Optionally specify a signal to send to the process.
 
-#### **`kill([signal: string])`** **`async`**
+```ts
+// Kill with default signal
+await subProcess.kill()
 
-Kills the process if it is running.
+// Kill with specific signal
+await subProcess.kill('SIGTERM')
+await subProcess.kill(9) // SIGKILL
+```
 
-#### **`skip([reason: string])`**
+### Instance Properties
 
-Skips the process if it has not been started yet to mark it as skipped and do not let it run.
-
-#### **`waitForStatus(status: string)`** **`async`**
-
-Waits for the process to reach a specific status or an status in the same level, for example `success` or `failure` will wait for the process to finish with any of those statuses.
-
-### Instance properties
+In addition to [BaseRunner properties](https://github.com/universal-packages/universal-base-runner?tab=readme-ov-file#getters), SubProcess provides:
 
 #### **`stdout`** **`string`**
 
-Buffer containing the stdout of the process.
+String containing the stdout output of the process. Only available when `captureStreams` option is enabled.
+
+```ts
+const subProcess = new SubProcess({
+  command: 'echo "Hello"',
+  captureStreams: true
+})
+await subProcess.run()
+console.log(subProcess.stdout) // "Hello\n"
+```
 
 #### **`stderr`** **`string`**
 
-Buffer containing the stderr of the process.
+String containing the stderr output of the process. Only available when `captureStreams` option is enabled.
 
 #### **`exitCode`** **`number`**
 
-Exit code of the process.
+Exit code of the process. `0` indicates success, non-zero values indicate errors.
 
-#### **`signal`** **`string`**
+#### **`signal`** **`string | number`**
 
-Signal that killed the process.
+Signal that killed the process, if applicable.
 
 #### **`processId`** **`number`**
 
-Process id of the process.
-
-#### **`status`** **`idle | running | success | error | failure | killed | stopped | killing | stopping`**
-
-Status of the process.
+Process ID of the running or completed process.
 
 ### Events
 
-`SubProcess` will emit events regarding execution status and output.
+SubProcess extends [BaseRunner events](https://github.com/universal-packages/universal-base-runner?tab=readme-ov-file#events) with additional process-specific events:
 
-```js
-subProcess.on('*', (event) => console.log(event))
-subProcess.on('running', (event) => console.log(event))
-subProcess.on('stdout', (event) => console.log(event))
-subProcess.on('stderr', (event) => console.log(event))
-subProcess.on('success', (event) => console.log(event))
-subProcess.on('failure', (event) => console.log(event))
-subProcess.on('stopping', (event) => console.log(event))
-subProcess.on('stopped', (event) => console.log(event))
-subProcess.on('skipped', (event) => console.log(event))
-subProcess.on('end', (event) => console.log(event))
-subProcess.on('timeout', (event) => console.log(event))
-subProcess.on('error', (event) => console.log(event))
-subProcess.on('warning', (event) => console.log(event))
+#### **`stdout`**: Emitted when the process writes to stdout
+
+```ts
+subProcess.on('stdout', (event) => {
+  console.log('Output:', event.payload.data)
+})
 ```
 
-## Engine
+#### **`stderr`**: Emitted when the process writes to stderr
 
-To create an engine that suits your requirements you just need to implement new classes and use them as the following:
+```ts
+subProcess.on('stderr', (event) => {
+  console.log('Error output:', event.payload.data)
+})
+```
 
-```js
+## Engine System
+
+SubProcess supports different execution engines for various use cases:
+
+### Creating a Custom Engine
+
+```ts
+import { EngineInterface } from '@universal-packages/sub-process'
+
 import MyEngine from './MyEngine'
 
 const subProcess = new SubProcess({ engine: new MyEngine() })
 ```
 
-You need to implement a engine process representation by subclassify the `EngineProcess` class to provide a way to kill yur custom process.
+### Engine Process Implementation
 
-```js
+You need to implement an engine process representation by extending the `EngineProcess` class to provide a way to control your custom process.
+
+```ts
 import { EngineProcess } from '@universal-packages/sub-process'
 
 export default class MyEngineProcess extends EngineProcess {
-  killObject(signal) {
+  killObject(signal?: NodeJS.Signals | number): void {
     this.object.sendKillSignal(signal)
   }
 }
 ```
 
-The run method of the engine will be called with the command, args, input and env to execute the process and return an `EngineProcess` instance.
+### Engine Implementation
 
-```js
-export default class MyEngine {
-  constructor(options) {
-    // Options passed through the adapters sub system
+The `run` method of the engine will be called with the command, args, input, env, and working directory to execute the process and return an `EngineProcess` instance.
+
+```ts
+import { EngineInterface } from '@universal-packages/sub-process'
+
+export default class MyEngine implements EngineInterface {
+  constructor(options?: any) {
+    // Options passed through the adapter sub-system
   }
 
-  prepare() {
-    // Initialize any connection using options
+  async prepare(): Promise<void> {
+    // Initialize any connections or resources using options
   }
 
-  release() {
-    // Release any resources or close any connection
+  async release(): Promise<void> {
+    // Release any resources or close any connections
   }
 
-  run(command, args, input, env) {
-    const myExecutableObject = myExecutionMethod.exec(command, args, input, env)
+  async run(command: string, args: string[], input: Readable, env: Record<string, string>, workingDirectory?: string): Promise<EngineProcess> {
+    const myExecutableObject = myExecutionMethod.exec(command, args, input, env, workingDirectory)
     const engineProcess = new MyEngineProcess(myExecutableObject.processId, myExecutableObject)
 
-    // Now the SubProcess instance knows how to kill the process when needed as well as the process id.
+    // Set up event handlers for the process
+    myExecutableObject.on('data', (data) => engineProcess.emit('stdout', data))
+    myExecutableObject.on('error', (data) => engineProcess.emit('stderr', data))
+    myExecutableObject.on('exit', (code) => {
+      if (code === 0) {
+        engineProcess.emit('success')
+      } else {
+        engineProcess.emit('failure', code)
+      }
+    })
+
     return engineProcess
   }
 }
@@ -167,12 +213,136 @@ export default class MyEngine {
 
 ### EngineInterface
 
-If you are using TypeScript just implement the `EngineInterface` in your class to ensure the right implementation.
+If you are using TypeScript, implement the `EngineInterface` in your class to ensure the correct implementation.
 
 ```ts
 import { EngineInterface } from '@universal-packages/sub-process'
 
-export default class MyEngine implements EngineInterface {}
+export default class MyEngine implements EngineInterface {
+  prepare?(): Promise<void> {
+    // Optional preparation logic
+  }
+
+  release?(): Promise<void> {
+    // Optional cleanup logic
+  }
+
+  run(command: string, args: string[], input: Readable, env: Record<string, string>, workingDirectory?: string): EngineProcess | Promise<EngineProcess> {
+    // Required implementation
+  }
+}
+```
+
+## Usage Examples
+
+### Basic Command Execution
+
+```ts
+import { SubProcess } from '@universal-packages/sub-process'
+
+const subProcess = new SubProcess({
+  command: 'ls -la',
+  captureStreams: true
+})
+
+await subProcess.run()
+console.log(subProcess.stdout)
+```
+
+### Environment Variables
+
+```ts
+const subProcess = new SubProcess({
+  command: 'node -e "console.log(process.env.MY_VAR)"',
+  env: { MY_VAR: 'Hello World' },
+  captureStreams: true
+})
+
+await subProcess.run()
+console.log(subProcess.stdout) // "Hello World"
+```
+
+### Process Input
+
+```ts
+const subProcess = new SubProcess({
+  command: 'node -e "process.stdin.on(\'data\', d => console.log(d.toString()))"',
+  input: 'Hello from input',
+  captureStreams: true
+})
+
+await subProcess.run()
+```
+
+### Working Directory
+
+```ts
+const subProcess = new SubProcess({
+  command: 'pwd',
+  workingDirectory: '/tmp',
+  captureStreams: true
+})
+
+await subProcess.run()
+console.log(subProcess.stdout) // "/tmp"
+```
+
+### Event Monitoring
+
+```ts
+const subProcess = new SubProcess({
+  command: 'ping -c 3 google.com',
+  captureStreams: true
+})
+
+subProcess.on('stdout', (event) => {
+  console.log('Real-time output:', event.payload.data)
+})
+
+subProcess.on('succeeded', () => {
+  console.log('Ping completed successfully')
+})
+
+await subProcess.run()
+```
+
+### Error Handling
+
+```ts
+const subProcess = new SubProcess({
+  command: 'exit 1',
+  captureStreams: true
+})
+
+try {
+  await subProcess.run()
+} catch (error) {
+  console.log('Exit code:', subProcess.exitCode) // 1
+  console.log('Error message:', error.message)
+}
+```
+
+### Different Engines
+
+```ts
+// Spawn engine (default)
+const spawnProcess = new SubProcess({
+  command: 'echo "Hello"',
+  engine: 'spawn'
+})
+
+// Exec engine for shell commands
+const execProcess = new SubProcess({
+  command: 'echo "Current directory: $(pwd)"',
+  engine: 'exec'
+})
+
+// Fork engine for Node.js scripts
+const forkProcess = new SubProcess({
+  command: 'node',
+  args: ['-e', 'console.log("Fork engine")'],
+  engine: 'fork'
+})
 ```
 
 ## Typescript

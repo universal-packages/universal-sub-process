@@ -12,7 +12,7 @@ export default class SpawnEngine extends BaseChildProcessEngine {
     this.options = { shell: this.getShellName(), ...options }
   }
 
-  protected createChildProcess(command: string, args: string[] = [], env: Record<string, string> = {}, workingDirectory?: string): ChildProcess {
+  protected override createChildProcess(command: string, args: string[] = [], env: Record<string, string> = {}, workingDirectory?: string): ChildProcess {
     const sourcedCommand = this.prependShellSourceScript(command, this.options.shell)
     const finalEnv = { ...process.env, ...this.options.env, ...env }
 

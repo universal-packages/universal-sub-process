@@ -1,4 +1,4 @@
-import { EventEmitter } from 'stream'
+import { EventEmitter } from 'events'
 
 export default class EngineProcess<O = any> extends EventEmitter {
   public readonly processId: number

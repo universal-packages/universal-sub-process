@@ -12,7 +12,7 @@ export default class ExecEngine extends BaseChildProcessEngine {
     this.options = { encoding: null, shell: this.getShellName(), maxBuffer: 1024 * 1024 * 10, ...options }
   }
 
-  protected createChildProcess(command: string, args: string[] = [], env: Record<string, string> = {}, workingDirectory?: string): ChildProcess {
+  protected override createChildProcess(command: string, args: string[] = [], env: Record<string, string> = {}, workingDirectory?: string): ChildProcess {
     const commandToRun = `${command} ${args.join(' ')}`.trim()
     const sourcedCommand = this.prependShellSourceScript(commandToRun, this.options.shell)
     const finalEnv = { ...process.env, ...this.options.env, ...env }

@@ -5,11 +5,11 @@ import ChildProcessEngineProcess from './ChildProcessEngineProcess'
 import { EngineInterface } from './SubProcess.types'
 
 export default class BaseChildProcessEngine implements EngineInterface {
-  protected error: ExecException
+  protected error: ExecException | null = null
 
   public run(command: string, args: string[], input: Readable, env: Record<string, string>, workingDirectory?: string): ChildProcessEngineProcess {
     const childProcess = this.createChildProcess(command, args, env, workingDirectory)
-    const childProcessEngineProcess = new ChildProcessEngineProcess(childProcess.pid, childProcess)
+    const childProcessEngineProcess = new ChildProcessEngineProcess(childProcess.pid || 0, childProcess)
 
     childProcess.stdout?.on('data', (data) => childProcessEngineProcess.emit('stdout', data))
     childProcess.stderr?.on('data', (data) => childProcessEngineProcess.emit('stderr', data))
@@ -50,7 +50,7 @@ export default class BaseChildProcessEngine implements EngineInterface {
     throw new Error('Method createChildProcess not implemented.')
   }
 
-  protected prependShellSourceScript(script: string, shell: string | boolean): string {
+  protected prependShellSourceScript(script: string, shell?: string | boolean): string {
     if (typeof shell === 'string') {
       return `source ~/.${shell}rc &> /dev/null; ${script}`
     } else {
