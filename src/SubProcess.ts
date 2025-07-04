@@ -14,7 +14,7 @@ export default class SubProcess extends BaseRunner<SubProcessEventMap> {
 
   private _engine: EngineInterface = new SpawnEngine()
   private _isMyEngine: boolean = true
-  private _input: Readable = new Readable()
+  private _input?: Readable
   private _command: string = ''
   private _args: string[] = []
   private _env: Record<string, string> = {}
@@ -57,6 +57,14 @@ export default class SubProcess extends BaseRunner<SubProcessEventMap> {
     return this.stop()
   }
 
+  public pushInput(input: string | Buffer | string[] | Buffer[]): void {
+    this._engineProcess?.pushInput(input)
+  }
+
+  public closeInput(): void {
+    this._engineProcess?.closeInput()
+  }
+
   protected override async internalPrepare(): Promise<void> {
     const engineResult = await this._generateEngine()
     this._engine = engineResult.engine
@@ -73,7 +81,7 @@ export default class SubProcess extends BaseRunner<SubProcessEventMap> {
   protected override async internalRun(): Promise<string | Error | void> {
     const finalWorkingDirectory = this.options.workingDirectory ? this.options.workingDirectory : undefined
 
-    const engineProcess = await this._engine.run(this._command, this._args, this._input, this._env, finalWorkingDirectory)
+    const engineProcess = await this._engine.run(this._command, this._args, this._env, this._input, finalWorkingDirectory)
     this._engineProcess = engineProcess
     this._internalProcessId = engineProcess.processId
 
@@ -137,8 +145,8 @@ export default class SubProcess extends BaseRunner<SubProcessEventMap> {
     return args ? [...commandArgs, ...args] : commandArgs
   }
 
-  private _generateInputStream(input?: string | Buffer | string[] | Buffer[] | Readable): Readable {
-    if (input) {
+  private _generateInputStream(input?: string | Buffer | string[] | Buffer[] | Readable): Readable | undefined {
+    if (input !== undefined) {
       if (input instanceof Readable) {
         input.push('\n')
         input.push(null)
@@ -159,14 +167,9 @@ export default class SubProcess extends BaseRunner<SubProcessEventMap> {
 
         return readable
       }
-    } else {
-      const readable = new Readable()
-
-      readable.push('\n')
-      readable.push(null)
-
-      return readable
     }
+
+    return undefined
   }
 
   private async _generateEngine(): Promise<{ engine: EngineInterface; isMine: boolean }> {

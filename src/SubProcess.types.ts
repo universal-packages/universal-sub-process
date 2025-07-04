@@ -17,7 +17,7 @@ export interface SubProcessOptions extends BaseRunnerOptions {
 export interface EngineInterface {
   prepare?: () => void | Promise<void>
   release?: () => void | Promise<void>
-  run: (command: string, args: string[], input: Readable, env: Record<string, string>, workingDirectory?: string) => EngineProcess | Promise<EngineProcess>
+  run: (command: string, args: string[], env: Record<string, string>, input?: Readable, workingDirectory?: string) => EngineProcess | Promise<EngineProcess>
 }
 
 export interface EngineInterfaceClass {

@@ -17,7 +17,7 @@ export async function testEngineTest() {
       const input = new Readable()
       input.push(null)
 
-      const engineProcess = engine.run('echo', ['hello'], input, { TEST_VAR: 'value' }, '/test/dir')
+      const engineProcess = engine.run('echo', ['hello'], { TEST_VAR: 'value' }, input, '/test/dir')
 
       return new Promise((resolve) => {
         engineProcess.on('success', () => {
@@ -41,7 +41,7 @@ export async function testEngineTest() {
       input.push(null)
 
       // Add some history
-      engine.run('echo', ['test'], input, {})
+      engine.run('echo', ['test'], {}, input)
       testsRunner.expect(TestEngine.commandHistory).toHaveLength(initialLength + 1)
 
       // Reset should clear history
@@ -54,7 +54,7 @@ export async function testEngineTest() {
       const input = new Readable()
       input.push(null)
 
-      const engineProcess = engine.run('echo', ['hello', 'world'], input, {})
+      const engineProcess = engine.run('echo', ['hello', 'world'], {}, input)
 
       return new Promise((resolve) => {
         let stdout = ''
@@ -76,7 +76,7 @@ export async function testEngineTest() {
       input.push(null)
 
       const startTime = Date.now()
-      const engineProcess = engine.run('sleep', ['200'], input, {}) // 200ms / 100 = 2ms actual sleep
+      const engineProcess = engine.run('sleep', ['200'], {}, input) // 200ms / 100 = 2ms actual sleep
 
       return new Promise((resolve) => {
         engineProcess.on('success', () => {
@@ -92,7 +92,7 @@ export async function testEngineTest() {
       const input = new Readable()
       input.push(null)
 
-      const engineProcess = engine.run('failure', ['Custom error message'], input, {})
+      const engineProcess = engine.run('failure', ['Custom error message'], {}, input)
 
       return new Promise((resolve) => {
         let stderr = ''
@@ -125,7 +125,7 @@ export async function testEngineTest() {
         ]
       })
 
-      const engineProcess = engine.run('test-command', ['arg1'], input, { TEST: 'value' })
+      const engineProcess = engine.run('test-command', ['arg1'], { TEST: 'value' }, input)
 
       return new Promise((resolve) => {
         let stdout = ''
@@ -156,7 +156,7 @@ export async function testEngineTest() {
         ]
       })
 
-      const engineProcess = engine.run('test-command', ['arg1'], input, {})
+      const engineProcess = engine.run('test-command', ['arg1'], {}, input)
 
       return new Promise((resolve) => {
         let stderr = ''
@@ -185,7 +185,7 @@ export async function testEngineTest() {
         events: [{ type: 'exit', signal: 'SIGTERM' }]
       })
 
-      const engineProcess = engine.run('test-command', [], input, {})
+      const engineProcess = engine.run('test-command', [], {}, input)
 
       return new Promise((resolve) => {
         engineProcess.on('killed', (signal) => {
@@ -212,7 +212,7 @@ export async function testEngineTest() {
       })
 
       const startTime = Date.now()
-      const engineProcess = engine.run('slow-command', [], input, {})
+      const engineProcess = engine.run('slow-command', [], {}, input)
 
       return new Promise((resolve) => {
         let stdout = ''
@@ -245,7 +245,7 @@ export async function testEngineTest() {
         ]
       })
 
-      const engineProcess = engine.run('killable-command', [], input, {})
+      const engineProcess = engine.run('killable-command', [], {}, input)
 
       // Kill the process after 75ms
       setTimeout(() => {
@@ -282,7 +282,7 @@ export async function testEngineTest() {
 
       testsRunner
         .expect(() => {
-          engine.run('error-command', [], input, {})
+          engine.run('error-command', [], {}, input)
         })
         .toThrow('Mocked error')
     })
@@ -318,8 +318,8 @@ export async function testEngineTest() {
         ]
       })
 
-      const process1 = engine.run('env-test', [], input1, { ENV1: 'value1' }, '/dir1')
-      const process2 = engine.run('env-test', [], input2, { ENV2: 'value2' }, '/dir2')
+      const process1 = engine.run('env-test', [], { ENV1: 'value1' }, input1, '/dir1')
+      const process2 = engine.run('env-test', [], { ENV2: 'value2' }, input2, '/dir2')
 
       return Promise.all([
         new Promise<string>((resolve) => {
@@ -365,7 +365,7 @@ export async function testEngineTest() {
       // First run
       const input1 = new Readable()
       input1.push(null)
-      const process1 = engine.run('repeat-command', [], input1, {})
+      const process1 = engine.run('repeat-command', [], {}, input1)
 
       const firstResult = await new Promise<string>((resolve) => {
         let stdout = ''
@@ -376,7 +376,7 @@ export async function testEngineTest() {
       // Second run
       const input2 = new Readable()
       input2.push(null)
-      const process2 = engine.run('repeat-command', [], input2, {})
+      const process2 = engine.run('repeat-command', [], {}, input2)
 
       const secondResult = await new Promise<string>((resolve) => {
         let stdout = ''
@@ -403,7 +403,7 @@ export async function testEngineTest() {
         ]
       })
 
-      const engineProcess = engine.run('history-test', ['arg'], input, {})
+      const engineProcess = engine.run('history-test', ['arg'], {}, input)
 
       return new Promise((resolve) => {
         engineProcess.on('success', () => {
@@ -423,7 +423,7 @@ export async function testEngineTest() {
       const input = new Readable()
       input.push(null)
 
-      const engineProcess = engine.run('echo', ['"hello world"'], input, {})
+      const engineProcess = engine.run('echo', ['"hello world"'], {}, input)
 
       return new Promise((resolve) => {
         let stdout = ''
@@ -444,7 +444,7 @@ export async function testEngineTest() {
       const input = new Readable()
       input.push(null)
 
-      const engineProcess = engine.run('echo', ["'hello world'"], input, {})
+      const engineProcess = engine.run('echo', ["'hello world'"], {}, input)
 
       return new Promise((resolve) => {
         let stdout = ''
@@ -465,7 +465,7 @@ export async function testEngineTest() {
       const input = new Readable()
       input.push(null)
 
-      const engineProcess = engine.run('failure', [], input, {})
+      const engineProcess = engine.run('failure', [], {}, input)
 
       return new Promise((resolve) => {
         let stderr = ''
@@ -497,7 +497,7 @@ export async function testEngineTest() {
         ]
       })
 
-      const engineProcess = engine.run('kill-stdout-test', [], input, {})
+      const engineProcess = engine.run('kill-stdout-test', [], {}, input)
 
       // Kill the process after a short delay
       setTimeout(() => {
@@ -534,7 +534,7 @@ export async function testEngineTest() {
         ]
       })
 
-      const engineProcess = engine.run('kill-stderr-test', [], input, {})
+      const engineProcess = engine.run('kill-stderr-test', [], {}, input)
 
       // Kill the process after a short delay
       setTimeout(() => {
@@ -561,7 +561,7 @@ export async function testEngineTest() {
       const input = new Readable()
       input.push(null)
 
-      const engineProcess = engine.run('failure', ['error message'], input, {})
+      const engineProcess = engine.run('failure', ['error message'], {}, input)
 
       // Kill the process after a short delay
       setTimeout(() => {
@@ -588,7 +588,7 @@ export async function testEngineTest() {
       const input = new Readable()
       input.push(null)
 
-      const engineProcess = engine.run('echo', ['hello world'], input, {})
+      const engineProcess = engine.run('echo', ['hello world'], {}, input)
 
       // Kill the process after a short delay
       setTimeout(() => {
@@ -615,7 +615,7 @@ export async function testEngineTest() {
       const input = new Readable()
       input.push(null)
 
-      const engineProcess = engine.run('echo', ['hello'], input, { TEST_VAR: 'value' }, '/test/dir')
+      const engineProcess = engine.run('echo', ['hello'], { TEST_VAR: 'value' }, input, '/test/dir')
 
       engineProcess.kill('SIGKILL')
 

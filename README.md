@@ -68,7 +68,7 @@ Extends [BaseRunnerOptions](https://github.com/universal-packages/universal-base
   Environment variables to pass to the process. These will be merged with the current process environment.
 
 - **`input`** `string | Buffer | string[] | Buffer[] | Readable` (optional)
-  Input to pass to the process stdin. Useful when a process requires user input like yes/no questions or configuration input.
+  Input to pass to the process stdin automatically during the process lifecycle. When provided, all input is made available immediately when the process starts. For manual input control during execution, omit this option and use `pushInput()` and `closeInput()` methods instead. Useful when a process requires user input like yes/no questions or configuration input.
 
 - **`workingDirectory`** `string` (optional)
   Working directory to run the process in. Defaults to the current working directory.
@@ -89,6 +89,28 @@ await subProcess.kill()
 await subProcess.kill('SIGTERM')
 await subProcess.kill(9) // SIGKILL
 ```
+
+#### **`pushInput(input: string | Buffer | string[] | Buffer[])`**
+
+Sends input chunks to the running process stdin. This method is used when you want to provide input manually during the process execution rather than providing all input upfront through options.
+
+```ts
+const subProcess = new SubProcess({
+  command: 'node -e "process.stdin.on(\'data\', d => console.log(d.toString()))"',
+  captureStreams: true
+})
+
+await subProcess.run()
+
+// Send input chunks manually
+subProcess.pushInput('First chunk\n')
+subProcess.pushInput('Second chunk\n')
+subProcess.closeInput() // Signal end of input
+```
+
+#### **`closeInput()`**
+
+Closes the stdin stream to signal that no more input will be provided. This should be called after all input chunks have been sent via `pushInput()`.
 
 ### Instance Properties
 
@@ -264,6 +286,12 @@ console.log(subProcess.stdout) // "Hello World"
 
 ### Process Input
 
+SubProcess supports two methods for providing input to processes:
+
+#### Automatic Input (via options)
+
+When you provide input through the `input` option, all input is automatically provided to the process during its lifecycle:
+
 ```ts
 const subProcess = new SubProcess({
   command: 'node -e "process.stdin.on(\'data\', d => console.log(d.toString()))"',
@@ -272,6 +300,26 @@ const subProcess = new SubProcess({
 })
 
 await subProcess.run()
+// All input is provided automatically when the process starts
+```
+
+#### Manual Input (via methods)
+
+When you need to control input timing or provide input dynamically, omit the `input` option and use `pushInput()` and `closeInput()` methods:
+
+```ts
+const subProcess = new SubProcess({
+  command: "node -e \"let data = ''; process.stdin.on('data', d => { data += d; }); process.stdin.on('end', () => console.log('Received:', data));\"",
+  captureStreams: true
+})
+
+// Start the process
+subProcess.run()
+
+// Send input chunks manually during execution
+setTimeout(() => subProcess.pushInput('First chunk\n'), 100)
+setTimeout(() => subProcess.pushInput('Second chunk\n'), 200)
+setTimeout(() => subProcess.closeInput(), 300) // Signal end of input
 ```
 
 ### Working Directory

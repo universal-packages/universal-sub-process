@@ -14,7 +14,23 @@ export default class EngineProcess<O = any> extends EventEmitter {
     this.killObject(signal)
   }
 
+  public pushInput(input: string | Buffer | string[] | Buffer[]): void {
+    this.pushInputObject(input)
+  }
+
+  public closeInput(): void {
+    this.closeInputObject()
+  }
+
   protected killObject(_signal?: NodeJS.Signals | number): void {
+    throw new Error('Not implemented')
+  }
+
+  protected pushInputObject(_input: string | Buffer | string[] | Buffer[]): void {
+    throw new Error('Not implemented')
+  }
+
+  protected closeInputObject(): void {
     throw new Error('Not implemented')
   }
 }

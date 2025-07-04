@@ -60,7 +60,7 @@ export async function execEngineTest() {
       const input = new Readable()
       input.push(null) // End the stream
 
-      const engineProcess = engine.run('echo', ['hello world'], input, {})
+      const engineProcess = engine.run('echo', ['hello world'], {}, input)
 
       return new Promise((resolve) => {
         let stdout = ''
@@ -86,7 +86,7 @@ export async function execEngineTest() {
       input.push(null)
 
       const env = { TEST_EXEC_VAR: 'exec_test_value' }
-      const engineProcess = engine.run('echo', ['$TEST_EXEC_VAR'], input, env)
+      const engineProcess = engine.run('echo', ['$TEST_EXEC_VAR'], env, input)
 
       return new Promise((resolve) => {
         let stdout = ''
@@ -111,7 +111,7 @@ export async function execEngineTest() {
       const input = new Readable()
       input.push(null)
 
-      const engineProcess = engine.run('pwd', [], input, {}, '/tmp')
+      const engineProcess = engine.run('pwd', [], {}, input, '/tmp')
 
       return new Promise((resolve) => {
         let stdout = ''
@@ -138,7 +138,7 @@ export async function execEngineTest() {
       input.push(null)
 
       const runEnv = { RUN_VAR: 'run_value' }
-      const engineProcess = engine.run('echo', ['$ENGINE_VAR,$RUN_VAR'], input, runEnv)
+      const engineProcess = engine.run('echo', ['$ENGINE_VAR,$RUN_VAR'], runEnv, input)
 
       return new Promise((resolve) => {
         let stdout = ''
@@ -163,7 +163,7 @@ export async function execEngineTest() {
       const input = new Readable()
       input.push(null)
 
-      const engineProcess = engine.run('exit', ['42'], input, {})
+      const engineProcess = engine.run('exit', ['42'], {}, input)
 
       return new Promise((resolve) => {
         engineProcess.on('failure', (code) => {
@@ -184,7 +184,7 @@ export async function execEngineTest() {
 
       // Use fixture file for stderr testing
       const fixtureFile = join(__dirname, '__fixtures__', 'stderr-output.js')
-      const engineProcess = engine.run('node', [fixtureFile], input, {})
+      const engineProcess = engine.run('node', [fixtureFile], {}, input)
 
       return new Promise((resolve) => {
         let stderr = ''
@@ -210,7 +210,7 @@ export async function execEngineTest() {
       const input = new Readable()
       input.push(null)
 
-      const engineProcess = engine.run('echo', ['hello world | grep hello'], input, {})
+      const engineProcess = engine.run('echo', ['hello world | grep hello'], {}, input)
 
       return new Promise((resolve) => {
         let stdout = ''
@@ -235,7 +235,7 @@ export async function execEngineTest() {
       const input = new Readable()
       input.push(null)
 
-      const engineProcess = engine.run('echo', ['first && echo second'], input, {})
+      const engineProcess = engine.run('echo', ['first && echo second'], {}, input)
 
       return new Promise((resolve) => {
         let stdout = ''
@@ -261,7 +261,7 @@ export async function execEngineTest() {
       const input = new Readable()
       input.push(null)
 
-      const engineProcess = engine.run('sleep', ['10'], input, {})
+      const engineProcess = engine.run('sleep', ['10'], {}, input)
 
       // Kill the process after a short delay
       setTimeout(() => {
@@ -285,7 +285,7 @@ export async function execEngineTest() {
       const input = new Readable()
       input.push(null)
 
-      const engineProcess = engine.run('non-existent-command-xyz789', [], input, {})
+      const engineProcess = engine.run('non-existent-command-xyz789', [], {}, input)
 
       return new Promise((resolve) => {
         engineProcess.on('failure', (code) => {
@@ -315,7 +315,7 @@ export async function execEngineTest() {
 
       // Generate output larger than maxBuffer
       const largeText = 'x'.repeat(2000)
-      const engineProcess = engine.run('echo', [largeText], input, {})
+      const engineProcess = engine.run('echo', [largeText], {}, input)
 
       return new Promise((resolve) => {
         engineProcess.on('failure', (code) => {
@@ -336,7 +336,7 @@ export async function execEngineTest() {
       const input = new Readable()
       input.push(null)
 
-      const engineProcess = engine.run('sleep', ['2'], input, {})
+      const engineProcess = engine.run('sleep', ['2'], {}, input)
 
       const startTime = Date.now()
       return new Promise((resolve) => {
@@ -363,7 +363,7 @@ export async function execEngineTest() {
       const input = new Readable()
       input.push(null)
 
-      const engineProcess = engine.run('echo', ['-n', 'hello', 'world'], input, {})
+      const engineProcess = engine.run('echo', ['-n', 'hello', 'world'], {}, input)
 
       return new Promise((resolve) => {
         let stdout = ''
@@ -390,7 +390,7 @@ export async function execEngineTest() {
 
       // Use fixture file that should exist
       const fixtureFile = join(__dirname, '__fixtures__', 'simple-output.js')
-      const engineProcess = engine.run('cat', [fixtureFile], input, {})
+      const engineProcess = engine.run('cat', [fixtureFile], {}, input)
 
       return new Promise((resolve) => {
         let stdout = ''
@@ -416,7 +416,7 @@ export async function execEngineTest() {
       input.push(null)
 
       const env = { MY_VAR: 'test_value' }
-      const engineProcess = engine.run('echo', ['$MY_VAR'], input, env)
+      const engineProcess = engine.run('echo', ['$MY_VAR'], env, input)
 
       return new Promise((resolve) => {
         let stdout = ''

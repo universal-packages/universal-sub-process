@@ -54,7 +54,7 @@ export async function forkEngineTest() {
       const input = new Readable()
       input.push(null) // End the stream
 
-      const engineProcess = engine.run(fixtureFile, [], input, {})
+      const engineProcess = engine.run(fixtureFile, [], {}, input)
 
       return new Promise((resolve) => {
         let stdout = ''
@@ -82,7 +82,7 @@ export async function forkEngineTest() {
       input.push(null)
 
       const env = { TEST_FORK_VAR: 'fork_test_value' }
-      const engineProcess = engine.run(fixtureFile, [], input, env)
+      const engineProcess = engine.run(fixtureFile, [], env, input)
 
       return new Promise((resolve) => {
         let stdout = ''
@@ -109,7 +109,7 @@ export async function forkEngineTest() {
       const input = new Readable()
       input.push(null)
 
-      const engineProcess = engine.run(fixtureFile, [], input, {}, '/tmp')
+      const engineProcess = engine.run(fixtureFile, [], {}, input, '/tmp')
 
       return new Promise((resolve) => {
         let stdout = ''
@@ -138,7 +138,7 @@ export async function forkEngineTest() {
       input.push(null)
 
       const runEnv = { RUN_VAR: 'run_value' }
-      const engineProcess = engine.run(fixtureFile, [], input, runEnv)
+      const engineProcess = engine.run(fixtureFile, [], runEnv, input)
 
       return new Promise((resolve) => {
         let stdout = ''
@@ -165,7 +165,7 @@ export async function forkEngineTest() {
       const input = new Readable()
       input.push(null)
 
-      const engineProcess = engine.run(fixtureFile, [], input, {})
+      const engineProcess = engine.run(fixtureFile, [], {}, input)
 
       return new Promise((resolve) => {
         engineProcess.on('failure', (code) => {
@@ -186,7 +186,7 @@ export async function forkEngineTest() {
       const input = new Readable()
       input.push(null)
 
-      const engineProcess = engine.run(fixtureFile, [], input, {})
+      const engineProcess = engine.run(fixtureFile, [], {}, input)
 
       return new Promise((resolve) => {
         let stderr = ''
@@ -214,7 +214,7 @@ export async function forkEngineTest() {
       const input = new Readable()
       input.push(null)
 
-      const engineProcess = engine.run(fixtureFile, ['arg1', 'arg2', 'arg3'], input, {})
+      const engineProcess = engine.run(fixtureFile, ['arg1', 'arg2', 'arg3'], {}, input)
 
       return new Promise((resolve) => {
         let stdout = ''
@@ -241,7 +241,7 @@ export async function forkEngineTest() {
       const input = new Readable()
       input.push(null)
 
-      const engineProcess = engine.run(fixtureFile, [], input, {})
+      const engineProcess = engine.run(fixtureFile, [], {}, input)
 
       // Kill the process after a short delay
       setTimeout(() => {
@@ -265,7 +265,7 @@ export async function forkEngineTest() {
       const input = new Readable()
       input.push(null)
 
-      const engineProcess = engine.run('non-existent-module.js', [], input, {})
+      const engineProcess = engine.run('non-existent-module.js', [], {}, input)
 
       return new Promise((resolve) => {
         engineProcess.on('failure', (code) => {
@@ -301,7 +301,7 @@ export async function forkEngineTest() {
       const input = new Readable()
       input.push(null)
 
-      const engineProcess = engine.run(fixtureFile, [], input, {})
+      const engineProcess = engine.run(fixtureFile, [], {}, input)
 
       return new Promise((resolve) => {
         let stdout = ''

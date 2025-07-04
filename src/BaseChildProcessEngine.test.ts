@@ -48,7 +48,7 @@ export async function baseChildProcessEngineTest() {
       const input = new Readable()
       input.push(null)
 
-      const engineProcess = engine.run('test-command', [], input, {})
+      const engineProcess = engine.run('test-command', [], {}, input)
 
       return new Promise((resolve) => {
         let errorEmitted = false
@@ -86,7 +86,7 @@ export async function baseChildProcessEngineTest() {
 
       testsRunner
         .expect(() => {
-          baseEngine.run('test', [], input, {})
+          baseEngine.run('test', [], {}, input)
         })
         .toThrow('Method createChildProcess not implemented.')
     })

@@ -7,7 +7,7 @@ import { EngineInterface } from './SubProcess.types'
 export default class BaseChildProcessEngine implements EngineInterface {
   protected error: ExecException | null = null
 
-  public run(command: string, args: string[], input: Readable, env: Record<string, string>, workingDirectory?: string): ChildProcessEngineProcess {
+  public run(command: string, args: string[], env: Record<string, string>, input?: Readable, workingDirectory?: string): ChildProcessEngineProcess {
     const childProcess = this.createChildProcess(command, args, env, workingDirectory)
     const childProcessEngineProcess = new ChildProcessEngineProcess(childProcess.pid || 0, childProcess)
 
@@ -41,7 +41,7 @@ export default class BaseChildProcessEngine implements EngineInterface {
     // Ignore stdin errors they occur when the process is killed
     childProcess.stdin?.on('error', () => {})
 
-    if (childProcess.stdin) input.pipe(childProcess.stdin)
+    if (childProcess.stdin && input) input.pipe(childProcess.stdin)
 
     return childProcessEngineProcess
   }

@@ -280,19 +280,23 @@ export async function inputOutputTest() {
       testsRunner.expect(subProcess.stdout.trim()).toBe(inputData)
     })
 
-    testsRunner.test('should send empty string input', async () => {
-      const subProcess = new SubProcess({
-        command: 'cat',
-        input: '',
-        captureStreams: true,
-        engine: 'spawn'
-      })
+    testsRunner.test(
+      'should send empty string input',
+      async () => {
+        const subProcess = new SubProcess({
+          command: 'cat',
+          input: '',
+          captureStreams: true,
+          engine: 'spawn'
+        })
 
-      await subProcess.run()
+        await subProcess.run()
 
-      testsRunner.expect(subProcess.status).toBe('succeeded')
-      testsRunner.expect(subProcess.stdout.trim()).toBe('')
-    })
+        testsRunner.expect(subProcess.status).toBe('succeeded')
+        testsRunner.expect(subProcess.stdout.trim()).toBe('')
+      },
+      { only: true }
+    )
 
     testsRunner.test('should handle input with special characters', async () => {
       const specialInput = 'Special chars: !@#$%^&*()[]{}|;:,.<>?'
@@ -417,6 +421,361 @@ export async function inputOutputTest() {
 
       testsRunner.expect(subProcess.status).toBe('succeeded')
       testsRunner.expect(subProcess.stdout.trim()).toBe('No input needed')
+    })
+
+    // Dynamic Input Tests (pushInput and closeInput)
+    testsRunner.test('should handle single pushInput with string and closeInput', async () => {
+      const subProcess = new SubProcess({
+        command: 'cat',
+        captureStreams: true,
+        engine: 'spawn'
+      })
+
+      // Start the process
+      const processPromise = subProcess.run()
+
+      // Push input after a short delay
+      setTimeout(() => {
+        subProcess.pushInput('Hello from pushInput!')
+        subProcess.closeInput()
+      }, 100)
+
+      await processPromise
+
+      testsRunner.expect(subProcess.status).toBe('succeeded')
+      testsRunner.expect(subProcess.stdout.trim()).toBe('Hello from pushInput!')
+    })
+
+    testsRunner.test('should handle multiple pushInput calls with strings', async () => {
+      const subProcess = new SubProcess({
+        command: 'cat',
+        captureStreams: true,
+        engine: 'spawn'
+      })
+
+      const processPromise = subProcess.run()
+
+      setTimeout(() => {
+        subProcess.pushInput('First chunk\n')
+        subProcess.pushInput('Second chunk\n')
+        subProcess.pushInput('Third chunk')
+        subProcess.closeInput()
+      }, 100)
+
+      await processPromise
+
+      testsRunner.expect(subProcess.status).toBe('succeeded')
+      testsRunner.expect(subProcess.stdout.trim()).toBe('First chunk\nSecond chunk\nThird chunk')
+    })
+
+    testsRunner.test('should handle pushInput with Buffer data', async () => {
+      const subProcess = new SubProcess({
+        command: 'cat',
+        captureStreams: true,
+        engine: 'spawn'
+      })
+
+      const processPromise = subProcess.run()
+
+      setTimeout(() => {
+        subProcess.pushInput(Buffer.from('Buffer chunk 1\n'))
+        subProcess.pushInput(Buffer.from('Buffer chunk 2'))
+        subProcess.closeInput()
+      }, 100)
+
+      await processPromise
+
+      testsRunner.expect(subProcess.status).toBe('succeeded')
+      testsRunner.expect(subProcess.stdout.trim()).toBe('Buffer chunk 1\nBuffer chunk 2')
+    })
+
+    testsRunner.test('should handle pushInput with array of strings', async () => {
+      const subProcess = new SubProcess({
+        command: 'cat',
+        captureStreams: true,
+        engine: 'spawn'
+      })
+
+      const processPromise = subProcess.run()
+
+      setTimeout(() => {
+        subProcess.pushInput(['Array', 'chunk', '1\n'])
+        subProcess.pushInput(['Array', 'chunk', '2'])
+        subProcess.closeInput()
+      }, 100)
+
+      await processPromise
+
+      testsRunner.expect(subProcess.status).toBe('succeeded')
+      testsRunner.expect(subProcess.stdout.trim()).toBe('Arraychunk1\nArraychunk2')
+    })
+
+    testsRunner.test('should handle pushInput with array of Buffers', async () => {
+      const subProcess = new SubProcess({
+        command: 'cat',
+        captureStreams: true,
+        engine: 'spawn'
+      })
+
+      const processPromise = subProcess.run()
+
+      setTimeout(() => {
+        subProcess.pushInput([Buffer.from('Buffer'), Buffer.from('Array'), Buffer.from('1\n')])
+        subProcess.pushInput([Buffer.from('Buffer'), Buffer.from('Array'), Buffer.from('2')])
+        subProcess.closeInput()
+      }, 100)
+
+      await processPromise
+
+      testsRunner.expect(subProcess.status).toBe('succeeded')
+      testsRunner.expect(subProcess.stdout.trim()).toBe('BufferArray1\nBufferArray2')
+    })
+
+    testsRunner.test('should handle pushInput with timing delays', async () => {
+      const subProcess = new SubProcess({
+        command: 'cat',
+        captureStreams: true,
+        engine: 'spawn'
+      })
+
+      const processPromise = subProcess.run()
+
+      setTimeout(() => {
+        subProcess.pushInput('First delayed chunk\n')
+      }, 100)
+
+      setTimeout(() => {
+        subProcess.pushInput('Second delayed chunk\n')
+      }, 200)
+
+      setTimeout(() => {
+        subProcess.pushInput('Third delayed chunk')
+        subProcess.closeInput()
+      }, 300)
+
+      await processPromise
+
+      testsRunner.expect(subProcess.status).toBe('succeeded')
+      testsRunner.expect(subProcess.stdout.trim()).toBe('First delayed chunk\nSecond delayed chunk\nThird delayed chunk')
+    })
+
+    testsRunner.test('should handle pushInput with commands that transform input', async () => {
+      const subProcess = new SubProcess({
+        command: 'tr',
+        args: ['a-z', 'A-Z'],
+        captureStreams: true,
+        engine: 'spawn'
+      })
+
+      const processPromise = subProcess.run()
+
+      setTimeout(() => {
+        subProcess.pushInput('hello ')
+        subProcess.pushInput('world')
+        subProcess.closeInput()
+      }, 100)
+
+      await processPromise
+
+      testsRunner.expect(subProcess.status).toBe('succeeded')
+      testsRunner.expect(subProcess.stdout.trim()).toBe('HELLO WORLD')
+    })
+
+    testsRunner.test('should handle pushInput with commands that count input', async () => {
+      const subProcess = new SubProcess({
+        command: 'wc',
+        args: ['-l'],
+        captureStreams: true,
+        engine: 'spawn'
+      })
+
+      const processPromise = subProcess.run()
+
+      setTimeout(() => {
+        subProcess.pushInput('Line 1\n')
+        subProcess.pushInput('Line 2\n')
+        subProcess.pushInput('Line 3\n')
+        subProcess.closeInput()
+      }, 100)
+
+      await processPromise
+
+      testsRunner.expect(subProcess.status).toBe('succeeded')
+      testsRunner.expect(subProcess.stdout.trim()).toBe('3')
+    })
+
+    testsRunner.test('should handle pushInput with Unicode characters', async () => {
+      const subProcess = new SubProcess({
+        command: 'cat',
+        captureStreams: true,
+        engine: 'spawn'
+      })
+
+      const processPromise = subProcess.run()
+
+      setTimeout(() => {
+        subProcess.pushInput('🚀 Hello ')
+        subProcess.pushInput('世界 ')
+        subProcess.pushInput('🌟')
+        subProcess.closeInput()
+      }, 100)
+
+      await processPromise
+
+      testsRunner.expect(subProcess.status).toBe('succeeded')
+      testsRunner.expect(subProcess.stdout.trim()).toBe('🚀 Hello 世界 🌟')
+    })
+
+    testsRunner.test('should handle pushInput with large data chunks', async () => {
+      const subProcess = new SubProcess({
+        command: 'cat',
+        captureStreams: true,
+        engine: 'spawn'
+      })
+
+      const processPromise = subProcess.run()
+
+      setTimeout(() => {
+        subProcess.pushInput('A'.repeat(5000))
+        subProcess.pushInput('B'.repeat(5000))
+        subProcess.closeInput()
+      }, 100)
+
+      await processPromise
+
+      testsRunner.expect(subProcess.status).toBe('succeeded')
+      testsRunner.expect(subProcess.stdout.trim()).toBe('A'.repeat(5000) + 'B'.repeat(5000))
+    })
+
+    testsRunner.test('should handle pushInput with special characters', async () => {
+      const subProcess = new SubProcess({
+        command: 'cat',
+        captureStreams: true,
+        engine: 'spawn'
+      })
+
+      const processPromise = subProcess.run()
+
+      setTimeout(() => {
+        subProcess.pushInput('Special: !@#$%^&*()')
+        subProcess.pushInput('[]{}|;:,.<>?')
+        subProcess.closeInput()
+      }, 100)
+
+      await processPromise
+
+      testsRunner.expect(subProcess.status).toBe('succeeded')
+      testsRunner.expect(subProcess.stdout.trim()).toBe('Special: !@#$%^&*()[]{}|;:,.<>?')
+    })
+
+    testsRunner.test('should handle closeInput without any pushInput', async () => {
+      const subProcess = new SubProcess({
+        command: 'cat',
+        captureStreams: true,
+        engine: 'spawn'
+      })
+
+      const processPromise = subProcess.run()
+
+      setTimeout(() => {
+        subProcess.closeInput()
+      }, 100)
+
+      await processPromise
+
+      testsRunner.expect(subProcess.status).toBe('succeeded')
+      testsRunner.expect(subProcess.stdout.trim()).toBe('')
+    })
+
+    testsRunner.test('should handle pushInput after closeInput (should not affect output)', async () => {
+      const subProcess = new SubProcess({
+        command: 'cat',
+        captureStreams: true,
+        engine: 'spawn'
+      })
+
+      const processPromise = subProcess.run()
+
+      setTimeout(() => {
+        subProcess.pushInput('Before close')
+        subProcess.closeInput()
+        // This should not affect the output as input is already closed
+        subProcess.pushInput('After close')
+      }, 100)
+
+      await processPromise
+
+      testsRunner.expect(subProcess.status).toBe('succeeded')
+      testsRunner.expect(subProcess.stdout.trim()).toBe('Before close')
+    })
+
+    testsRunner.test('should handle pushInput with different engines', async () => {
+      const engines = ['spawn', 'exec'] as const
+
+      for (const engine of engines) {
+        const subProcess = new SubProcess({
+          command: 'cat',
+          captureStreams: true,
+          engine
+        })
+
+        const processPromise = subProcess.run()
+
+        setTimeout(() => {
+          subProcess.pushInput(`Input for ${engine} engine`)
+          subProcess.closeInput()
+        }, 100)
+
+        await processPromise
+
+        testsRunner.expect(subProcess.status).toBe('succeeded')
+        testsRunner.expect(subProcess.stdout.trim()).toBe(`Input for ${engine} engine`)
+      }
+    })
+
+    testsRunner.test('should handle mixed pushInput types in sequence', async () => {
+      const subProcess = new SubProcess({
+        command: 'cat',
+        captureStreams: true,
+        engine: 'spawn'
+      })
+
+      const processPromise = subProcess.run()
+
+      setTimeout(() => {
+        subProcess.pushInput('String chunk\n')
+        subProcess.pushInput(Buffer.from('Buffer chunk\n'))
+        subProcess.pushInput(['Array', 'chunk\n'])
+        subProcess.pushInput([Buffer.from('Buffer'), Buffer.from('Array\n')])
+        subProcess.closeInput()
+      }, 100)
+
+      await processPromise
+
+      testsRunner.expect(subProcess.status).toBe('succeeded')
+      testsRunner.expect(subProcess.stdout.trim()).toBe('String chunk\nBuffer chunk\nArraychunk\nBufferArray')
+    })
+
+    testsRunner.test('should handle pushInput for interactive processes', async () => {
+      const subProcess = new SubProcess({
+        command: 'sort',
+        captureStreams: true,
+        engine: 'spawn'
+      })
+
+      const processPromise = subProcess.run()
+
+      setTimeout(() => {
+        subProcess.pushInput('zebra\n')
+        subProcess.pushInput('apple\n')
+        subProcess.pushInput('banana\n')
+        subProcess.closeInput()
+      }, 100)
+
+      await processPromise
+
+      testsRunner.expect(subProcess.status).toBe('succeeded')
+      testsRunner.expect(subProcess.stdout.trim()).toBe('apple\nbanana\nzebra')
     })
   })
 

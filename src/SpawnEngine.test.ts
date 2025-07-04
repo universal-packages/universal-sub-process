@@ -47,7 +47,7 @@ export async function spawnEngineTest() {
       const input = new Readable()
       input.push(null) // End the stream
 
-      const engineProcess = engine.run('echo', ['hello world'], input, {})
+      const engineProcess = engine.run('echo', ['hello world'], {}, input)
 
       return new Promise((resolve) => {
         let stdout = ''
@@ -73,7 +73,7 @@ export async function spawnEngineTest() {
       input.push(null)
 
       const env = { TEST_SPAWN_VAR: 'spawn_test_value' }
-      const engineProcess = engine.run('env', [], input, env)
+      const engineProcess = engine.run('env', [], env, input)
 
       return new Promise((resolve) => {
         let stdout = ''
@@ -98,7 +98,7 @@ export async function spawnEngineTest() {
       const input = new Readable()
       input.push(null)
 
-      const engineProcess = engine.run('pwd', [], input, {}, '/tmp')
+      const engineProcess = engine.run('pwd', [], {}, input, '/tmp')
 
       return new Promise((resolve) => {
         let stdout = ''
@@ -125,7 +125,7 @@ export async function spawnEngineTest() {
       input.push(null)
 
       const runEnv = { RUN_VAR: 'run_value' }
-      const engineProcess = engine.run('env', [], input, runEnv)
+      const engineProcess = engine.run('env', [], runEnv, input)
 
       return new Promise((resolve) => {
         let stdout = ''
@@ -151,7 +151,7 @@ export async function spawnEngineTest() {
       const input = new Readable()
       input.push(null)
 
-      const engineProcess = engine.run('node', ['-e', 'process.exit(42)'], input, {})
+      const engineProcess = engine.run('node', ['-e', 'process.exit(42)'], {}, input)
 
       return new Promise((resolve) => {
         engineProcess.on('failure', (code) => {
@@ -170,7 +170,7 @@ export async function spawnEngineTest() {
       const input = new Readable()
       input.push(null)
 
-      const engineProcess = engine.run('node', ['-e', 'console.error("error message"); process.exit(1)'], input, {})
+      const engineProcess = engine.run('node', ['-e', 'console.error("error message"); process.exit(1)'], {}, input)
 
       return new Promise((resolve) => {
         let stderr = ''
@@ -195,7 +195,7 @@ export async function spawnEngineTest() {
       const engine = new SpawnEngine()
       const input = new Readable()
 
-      const engineProcess = engine.run('cat', [], input, {})
+      const engineProcess = engine.run('cat', [], {}, input)
 
       // Send data to the process
       input.push('test input\n')
@@ -224,7 +224,7 @@ export async function spawnEngineTest() {
       const input = new Readable()
       input.push(null)
 
-      const engineProcess = engine.run('node', ['-e', 'setTimeout(() => {}, 10000)'], input, {})
+      const engineProcess = engine.run('node', ['-e', 'setTimeout(() => {}, 10000)'], {}, input)
 
       // Kill the process after a short delay
       setTimeout(() => {
@@ -248,7 +248,7 @@ export async function spawnEngineTest() {
       const input = new Readable()
       input.push(null)
 
-      const engineProcess = engine.run('non-existent-command-xyz789', [], input, {})
+      const engineProcess = engine.run('non-existent-command-xyz789', [], {}, input)
 
       return new Promise((resolve) => {
         engineProcess.on('failure', (code) => {
@@ -277,7 +277,7 @@ export async function spawnEngineTest() {
       input.push(null)
 
       // Test shell command with pipe - but spawn with shell: true should handle this
-      const engineProcess = engine.run('echo hello && echo world', [], input, {})
+      const engineProcess = engine.run('echo hello && echo world', [], {}, input)
 
       return new Promise((resolve) => {
         let stdout = ''

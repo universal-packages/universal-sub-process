@@ -8,7 +8,7 @@ let TEST_ID = 0
 interface HistoryEntry {
   command: string
   args: string[]
-  input: string | Buffer | string[] | Buffer[] | Readable
+  input?: Readable
   env: Record<string, string>
   workingDirectory?: string
   events?: MockEvent[]
@@ -54,7 +54,7 @@ export default class TestEngine implements EngineInterface {
 
   private static mockEvents: Record<string, MockEvent[][]> = {}
 
-  run(command: string, args: string[], input: Readable, env: Record<string, string>, workingDirectory?: string): TestEngineProcess {
+  run(command: string, args: string[], env: Record<string, string>, input?: Readable, workingDirectory?: string): TestEngineProcess {
     TestEngine.commandHistory.push({ command, args, input, env, workingDirectory, events: [] })
 
     let killWithSignal: NodeJS.Signals | number | null = null
