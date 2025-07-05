@@ -1,8 +1,8 @@
 import { ChildProcess } from 'child_process'
 
-import EngineProcess from './EngineProcess'
+import { EngineProcess } from './EngineProcess'
 
-export default class ChildProcessEngineProcess extends EngineProcess<ChildProcess> {
+export class ChildProcessEngineProcess extends EngineProcess<ChildProcess> {
   public override async killObject(signal?: NodeJS.Signals | number): Promise<void> {
     this.object.kill(signal)
   }

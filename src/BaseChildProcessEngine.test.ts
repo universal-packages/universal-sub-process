@@ -2,7 +2,7 @@ import { TestsRunner } from '@universal-packages/tests-runner'
 import { EventEmitter } from 'events'
 import { Readable } from 'stream'
 
-import BaseChildProcessEngine from './BaseChildProcessEngine'
+import { BaseChildProcessEngine } from './BaseChildProcessEngine'
 import { evaluateTestResults } from './utils.test'
 
 // Create a test implementation that allows us to control error scenarios

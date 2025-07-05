@@ -1,6 +1,6 @@
 import { Readable } from 'stream'
 
-import SubProcess from '../src/SubProcess'
+import { SubProcess } from '../src/SubProcess'
 
 export async function runProcessInputExample() {
   console.log('\n⌨️  Example 4: Process Input')

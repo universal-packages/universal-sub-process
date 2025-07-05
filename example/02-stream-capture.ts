@@ -1,4 +1,4 @@
-import SubProcess from '../src/SubProcess'
+import { SubProcess } from '../src/SubProcess'
 
 export async function runStreamCaptureExample() {
   console.log('\n📊 Example 2: Stream Capture')

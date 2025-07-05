@@ -1,7 +1,7 @@
 import { Readable } from 'stream'
 
 import { EngineInterface } from './SubProcess.types'
-import TestEngineProcess from './TestEngineProcess'
+import { TestEngineProcess } from './TestEngineProcess'
 
 let TEST_ID = 0
 
@@ -31,7 +31,7 @@ interface ProcessMockDescriptor {
   events: MockEvent[]
 }
 
-export default class TestEngine implements EngineInterface {
+export class TestEngine implements EngineInterface {
   public static readonly commandHistory: HistoryEntry[] = []
 
   public static reset() {

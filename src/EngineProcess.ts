@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events'
 
-export default class EngineProcess<O = any> extends EventEmitter {
+export class EngineProcess<O = any> extends EventEmitter {
   public readonly processId: number
   public readonly object: O
 

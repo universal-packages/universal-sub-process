@@ -1,6 +1,6 @@
 import { TestsRunner } from '@universal-packages/tests-runner'
 
-import SubProcess from '../SubProcess'
+import { SubProcess } from '../SubProcess'
 import { evaluateTestResults } from '../utils.test'
 
 export async function killTimeoutTest() {

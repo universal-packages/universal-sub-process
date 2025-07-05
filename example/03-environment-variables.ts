@@ -1,4 +1,4 @@
-import SubProcess from '../src/SubProcess'
+import { SubProcess } from '../src/SubProcess'
 
 export async function runEnvironmentExample() {
   console.log('\n🌍 Example 3: Environment Variables')

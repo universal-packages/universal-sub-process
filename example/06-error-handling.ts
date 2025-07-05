@@ -1,4 +1,4 @@
-import SubProcess from '../src/SubProcess'
+import { SubProcess } from '../src/SubProcess'
 
 export async function runErrorHandlingExample() {
   console.log('\n💥 Example 6: Error Handling')

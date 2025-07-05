@@ -1,7 +1,7 @@
 import { TestsRunner } from '@universal-packages/tests-runner'
 import { Readable } from 'stream'
 
-import TestEngine from './TestEngine'
+import { TestEngine } from './TestEngine'
 import { evaluateTestResults } from './utils.test'
 
 export async function testEngineTest() {

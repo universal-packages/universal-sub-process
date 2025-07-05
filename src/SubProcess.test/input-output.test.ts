@@ -1,7 +1,7 @@
 import { TestsRunner } from '@universal-packages/tests-runner'
 import { Readable } from 'stream'
 
-import SubProcess from '../SubProcess'
+import { SubProcess } from '../SubProcess'
 import { evaluateTestResults } from '../utils.test'
 
 export async function inputOutputTest() {

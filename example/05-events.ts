@@ -1,4 +1,4 @@
-import SubProcess from '../src/SubProcess'
+import { SubProcess } from '../src/SubProcess'
 
 export async function runEventsExample() {
   console.log('\n🎭 Example 5: Events')

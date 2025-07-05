@@ -7,6 +7,7 @@ import { runErrorHandlingExample } from './06-error-handling'
 import { runDifferentEnginesExample } from './07-different-engines'
 import { runAdvancedUsageExample } from './08-advanced-usage'
 import { runComplexInputsExample } from './09-complex-inputs'
+import { runOrchestrationExample } from './10-orchestration'
 
 async function runAllExamples() {
   console.log('\n' + '='.repeat(60))
@@ -48,6 +49,11 @@ async function runAllExamples() {
 
     // Example 9: Complex Inputs
     await runComplexInputsExample()
+    await delay(1000)
+
+    // Example 10: Orchestration
+    await runOrchestrationExample()
+    await delay(1000)
 
     console.log('\n' + '='.repeat(60))
     console.log('🎉 All examples completed successfully!')

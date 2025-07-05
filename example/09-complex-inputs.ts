@@ -1,4 +1,4 @@
-import SubProcess from '../src/SubProcess'
+import { SubProcess } from '../src/SubProcess'
 
 export async function runComplexInputsExample() {
   console.log('\n⌨️  Example 9: Complex Inputs')

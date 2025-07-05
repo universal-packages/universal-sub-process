@@ -1,6 +1,6 @@
 import { TestsRunner } from '@universal-packages/tests-runner'
 
-import EngineProcess from './EngineProcess'
+import { EngineProcess } from './EngineProcess'
 import { evaluateTestResults } from './utils.test'
 
 export async function engineProcessTest() {

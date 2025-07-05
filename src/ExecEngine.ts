@@ -1,9 +1,9 @@
 import { ChildProcess, exec } from 'child_process'
 
-import BaseChildProcessEngine from './BaseChildProcessEngine'
+import { BaseChildProcessEngine } from './BaseChildProcessEngine'
 import { ExecEngineOptions } from './ExecEngine.types'
 
-export default class ExecEngine extends BaseChildProcessEngine {
+export class ExecEngine extends BaseChildProcessEngine {
   public readonly options: ExecEngineOptions
 
   public constructor(options?: ExecEngineOptions) {

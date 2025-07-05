@@ -1,7 +1,7 @@
 import { BaseRunnerEventMap, BaseRunnerOptions } from '@universal-packages/base-runner'
 import { Readable } from 'stream'
 
-import EngineProcess from './EngineProcess'
+import { EngineProcess } from './EngineProcess'
 
 export interface SubProcessOptions extends BaseRunnerOptions {
   args?: string[]
@@ -12,6 +12,7 @@ export interface SubProcessOptions extends BaseRunnerOptions {
   env?: Record<string, string>
   input?: string | Buffer | string[] | Buffer[] | Readable
   workingDirectory?: string
+  processIndex?: number
 }
 
 export interface EngineInterface {

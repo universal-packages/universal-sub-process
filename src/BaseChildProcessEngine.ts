@@ -1,10 +1,10 @@
 import { ChildProcess, ExecException } from 'child_process'
 import { Readable } from 'stream'
 
-import ChildProcessEngineProcess from './ChildProcessEngineProcess'
+import { ChildProcessEngineProcess } from './ChildProcessEngineProcess'
 import { EngineInterface } from './SubProcess.types'
 
-export default class BaseChildProcessEngine implements EngineInterface {
+export class BaseChildProcessEngine implements EngineInterface {
   protected error: ExecException | null = null
 
   public run(command: string, args: string[], env: Record<string, string>, input?: Readable, workingDirectory?: string): ChildProcessEngineProcess {

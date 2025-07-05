@@ -1,9 +1,9 @@
 import { ChildProcess, fork } from 'child_process'
 
-import BaseChildProcessEngine from './BaseChildProcessEngine'
+import { BaseChildProcessEngine } from './BaseChildProcessEngine'
 import { ForkEngineOptions } from './ForkEngine.types'
 
-export default class ForkEngine extends BaseChildProcessEngine {
+export class ForkEngine extends BaseChildProcessEngine {
   public readonly options: ForkEngineOptions
 
   public constructor(options?: ForkEngineOptions) {

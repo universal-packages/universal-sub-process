@@ -4,7 +4,7 @@ import { dirname } from 'path'
 import { Readable } from 'stream'
 import { fileURLToPath } from 'url'
 
-import ForkEngine from './ForkEngine'
+import { ForkEngine } from './ForkEngine'
 import { evaluateTestResults } from './utils.test'
 
 const __filename = fileURLToPath(import.meta.url)

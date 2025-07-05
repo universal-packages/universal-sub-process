@@ -1,9 +1,9 @@
 import { ChildProcess, spawn } from 'child_process'
 
-import BaseChildProcessEngine from './BaseChildProcessEngine'
+import { BaseChildProcessEngine } from './BaseChildProcessEngine'
 import { SpawnEngineOptions } from './SpawnEngine.types'
 
-export default class SpawnEngine extends BaseChildProcessEngine {
+export class SpawnEngine extends BaseChildProcessEngine {
   public readonly options: SpawnEngineOptions
 
   public constructor(options?: SpawnEngineOptions) {

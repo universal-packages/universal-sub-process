@@ -2,14 +2,14 @@ import { AdapterResolver } from '@universal-packages/adapter-resolver'
 import { BaseRunner } from '@universal-packages/base-runner'
 import { Readable } from 'stream'
 
-import EngineProcess from './EngineProcess'
-import ExecEngine from './ExecEngine'
-import ForkEngine from './ForkEngine'
-import SpawnEngine from './SpawnEngine'
+import { EngineProcess } from './EngineProcess'
+import { ExecEngine } from './ExecEngine'
+import { ForkEngine } from './ForkEngine'
+import { SpawnEngine } from './SpawnEngine'
 import { EngineInterface, EngineInterfaceClass, SubProcessEventMap, SubProcessOptions } from './SubProcess.types'
-import TestEngine from './TestEngine'
+import { TestEngine } from './TestEngine'
 
-export default class SubProcess extends BaseRunner<SubProcessEventMap> {
+export class SubProcess extends BaseRunner<SubProcessEventMap> {
   declare public readonly options: SubProcessOptions
 
   private _engine: EngineInterface = new SpawnEngine()
@@ -47,6 +47,10 @@ export default class SubProcess extends BaseRunner<SubProcessEventMap> {
     return this._internalProcessId
   }
 
+  public get processIndex(): number {
+    return this.options.processIndex || 0
+  }
+
   constructor(options: SubProcessOptions) {
     super({ engine: process.env.NODE_ENV === 'test' ? 'test' : 'spawn', ...options })
   }
@@ -76,6 +80,10 @@ export default class SubProcess extends BaseRunner<SubProcessEventMap> {
     this._args = this._extractArgs(this.options.command, this.options.args)
     this._env = this.options.env || {}
     this._input = this._generateInputStream(this.options.input)
+
+    if (this.options.processIndex) {
+      this._env.PROCESS_INDEX = this.options.processIndex.toString()
+    }
   }
 
   protected override async internalRun(): Promise<string | Error | void> {

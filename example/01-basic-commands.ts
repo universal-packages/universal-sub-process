@@ -1,4 +1,4 @@
-import SubProcess from '../src/SubProcess'
+import { SubProcess } from '../src/SubProcess'
 
 export async function runBasicCommandsExample() {
   console.log('\n📋 Example 1: Basic Commands')

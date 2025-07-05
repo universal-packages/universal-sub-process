@@ -1,4 +1,4 @@
-import SubProcess from '../src/SubProcess'
+import { SubProcess } from '../src/SubProcess'
 
 export async function runDifferentEnginesExample() {
   console.log('\n⚙️  Example 7: Different Engines')
