@@ -27,7 +27,12 @@ export class Orchestration extends EventEmitter<OrchestrationEventMap> {
 
   public static closeCommunicationWithParent(): void {
     const messagePackage: MessagePackage = { type: 'close-communication', data: {} }
-    const messagePackageString = `${MESSAGE_WRAPPER_START}${JSON.stringify(messagePackage)}${MESSAGE_WRAPPER_END}`
+    const messagePackageString = `${MESSAGE_WRAPPER_START}${JSON.stringify(messagePackage, (_key, value) => {
+      if (typeof value === 'bigint') {
+        return value.toString()
+      }
+      return value
+    })}${MESSAGE_WRAPPER_END}`
     console.log(messagePackageString)
   }
 
