@@ -20,7 +20,12 @@ export class Orchestration extends EventEmitter<OrchestrationEventMap> {
 
   public static sendMessageToParent(data: Record<string, any>): void {
     const messagePackage: MessagePackage = { type: 'message', data }
-    const messagePackageString = `${MESSAGE_WRAPPER_START}${JSON.stringify(messagePackage)}${MESSAGE_WRAPPER_END}`
+    const messagePackageString = `${MESSAGE_WRAPPER_START}${JSON.stringify(messagePackage, (_key, value) => {
+      if (typeof value === 'bigint') {
+        return value.toString()
+      }
+      return value
+    })}${MESSAGE_WRAPPER_END}`
 
     console.log(messagePackageString)
   }
@@ -141,7 +146,12 @@ export class Orchestration extends EventEmitter<OrchestrationEventMap> {
 
     for (const subProcess of subProcessToSendMessage) {
       const messagePackage: MessagePackage = { type: 'message', data }
-      const messagePackageString = `${MESSAGE_WRAPPER_START}${JSON.stringify(messagePackage)}${MESSAGE_WRAPPER_END}`
+      const messagePackageString = `${MESSAGE_WRAPPER_START}${JSON.stringify(messagePackage, (_key, value) => {
+        if (typeof value === 'bigint') {
+          return value.toString()
+        }
+        return value
+      })}${MESSAGE_WRAPPER_END}`
 
       subProcess.pushInput(messagePackageString)
     }
